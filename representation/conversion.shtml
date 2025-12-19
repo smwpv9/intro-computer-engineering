@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Binary Conversion</title>
+    <link rel="stylesheet" href="../include/main.css">
+    <script src="./convert.js"></script>
+  </head>
+  <body>
+    <main id="root" class=vert-container>
+        <div class=back-button-container>
+            <a href="../index.shtml">
+                <button class=back-button>←</button>
+            </a>
+            <h1>Representation Conversion:</h1>
+        </div>
+        <button
+          onClick=random()
+          class=button
+          style="max-width: 200px"
+        >
+          Random Inputs
+        </button>
+      
+      <form class=input-container onsubmit="return false;" name="conversion">
+        <div class=input>
+        <label for="fromRep">From: <label>
+        <select class=input id="fromRep" name="fromRep">
+            <option value="b10">Decimal</option>
+            <option value="b2u">Unsigned Binary</option>
+            <option value="b2-1">Ones Complement Binary</option>
+            <option value="b2-2">Twos Complement Binary</option>
+            <option value="b16">Hexadecimal</option>
+        </select>
+        </div>
+        <div class=input>
+        <label for="toRep">To: <label>
+        <select class=input id="toRep" name="toRep">
+            <option value="b10">Decimal</option>
+            <option value="b2u">Unsigned Binary</option>
+            <option value="b2-1">Ones Complement Binary</option>
+            <option value="b2-2">Twos Complement Binary</option>
+            <option value="b16">Hexadecimal</option>
+        </select>
+        </div>
+        <div class=input>
+        <label for="numBits">Number of Bits: <label>
+        <select class=input id="numBits" name="numBits">
+            <option value="4">4</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="16">16</option>
+            <option value="32">32</option>
+        </select>
+        </div>
+        <div class=back-button-container>
+        <input
+          type="text"
+          class=input
+          placeholder="Enter number..."
+          name="num"
+          style="flex: 5;"
+        />
+        <button onClick=randomNumber() class=button style="flex:1;">Rand</button>
+        </div>
+        <button
+          onClick=handleConvert()
+          class=button
+        >
+          Convert
+        </button>
+      </form>
+        <div class=steps-container id=stepsContainer>
+          <h3 class=steps-header>Conversion Steps</h3>
+          <ul class=steps-list id=stepsList>
+            {steps.map((step, index) => (
+              <li key={index} class=step}>{step}</li>
+            ))}
+          </ul>
+        </div>
+        <div class=result-container id=resultContainer>
+          <span class=result-label>Result:</span> {result}
+        </div>
+    </div>
+    </main>
+  </body>
+</html>
