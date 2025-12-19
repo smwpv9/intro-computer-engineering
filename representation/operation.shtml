@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Binary Conversion</title>
+    <link rel="stylesheet" href="../include/main.css">
+    <script src="./operate.js"></script>
+  </head>
+  <body>
+    <main id="root" class=vert-container>
+        <div class="back-button-container">
+          <a href="../index.shtml">
+          <button class="back-button">←</button>
+            </a>
+          <h1>Operations</h1>
+        </div>
+        <button
+          onClick=random()
+          class=button
+          style="max-width: 200px"
+        >
+          Random Inputs
+        </button>
+
+        <form class="input-container" onsubmit="return false;" name="operate">
+           <div class=input>
+        <label for="numBits">Number of Bits: <label>
+        <select class=input id="numBits" name="numBits">
+            <option value="4">4</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="16">16</option>
+            <option value="32">32</option>
+        </select>
+        </div>
+          <input
+            class=input
+            type="text"
+            name=num1
+            placeholder="First Binary Number"
+          />
+        <select class=input id="operation" name="operation">
+            <option value="add">Add +</option>
+            <option value="and">And &</option>
+            <option value="or">Or |</option>
+            <option value="xor">Xor ^</option>
+        </select>
+          <input
+            class=input
+            type="text"
+            name=num2
+            placeholder="Second Binary Number"
+          />
+        </div>
+
+        <button
+          onClick=handleOperation()
+          class="calculate-button"
+        >
+          Calculate
+        </button>
+
+          <div class="result-container" id=result-container>
+            <div class="result-steps">
+              <h3>Calculation Steps:</h3>
+              <div id=steps-list></div>
+            </div>
+            <div class="result-output">
+              <h3>Result:</h3>
+              <div id=result></div>
+            </div>
+              <div class="result-output">
+                <h3>Overflow:</h3>
+                <div id=remainder></div>
+              </div>
+          </div>
+    </main>
+  </body>
+</html>
