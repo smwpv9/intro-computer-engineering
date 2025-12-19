@@ -127,116 +127,116 @@ button:hover {
             border-radius: 6px;
             padding: 10px;
           }
-/*
 
-.container {
+
+.fp-container {
       width: 100%;
-      maxWidth: 1300px;
-      backgroundColor: #f1f1f1;
+      max-width: 1300px;
+      background-color: #f1f1f1;
       padding: 20px;
-      borderRadius: 8px;
-      boxShadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
-    .header {
-      fontSize: 24px;
-      fontWeight: bold;
-      marginBottom: 20px;
-      textAlign: center;
+    .fp-header {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      text-align: center;
     }
     
-    .gridContainer {
+    .fp-gridContainer {
       display: grid;
-      gridTemplateColumns: 220px 1fr 2fr 4fr; // 4 columns, more width for exponent/mantissa
-      rowGap: 10px;
-      alignItems: center;
-      marginBottom: 20px;
+      grid-template-columns: 220px 1fr 2fr 4fr; // 4 columns, more width for exponent/mantissa
+      row-gap: 10px;
+      align-items: center;
+      margin-bottom: 20px;
     }
-    .sectionLabel {
-      fontWeight: bold;
-      marginBottom: 4px;
+    .fp-sectionLabel {
+      font-weight: bold;
+      margin-bottom: 4px;
     }
     
-    .signSection {
-      backgroundColor: #e0e0f0;
-      textAlign: center;
+    .fp-signSection {
+      background-color: #e0e0f0;
+      text-align: center;
       padding: 10px;
       display: flex;
-      justifyContent: center;
-      whiteSpace: nowrap;
-      overflowX: auto;
+      justify-content: center;
+      white-space: nowrap;
+      overflow-X: auto;
     }
-    .exponentSection {
-      backgroundColor: #d0f0d0;
-      textAlign: center;
+    .fp-exponentSection {
+      background-color: #d0f0d0;
+      text-align: center;
       padding: 10px;
       display: flex;
-      justifyContent: center;
-      whiteSpace: nowrap;
-      overflowX: auto;
+      justify-content: center;
+      white-space: nowrap;
+      overflow-X: auto;
     }
-    .mantissaSection {
-      backgroundColor: #f0e0d0;
-      textAlign: center;
+    .fp-mantissaSection {
+      background-color: #f0e0d0;
+      text-align: center;
       padding: 10px;
       display: flex;
-      justifyContent: center;
-      whiteSpace: nowrap;
-      overflowX: auto;
+      justify-content: center;
+      white-space: nowrap;
+      overflow-X: auto;
     }
-    .inputLabel {
-      textAlign: left;
-      fontWeight: bold;
+    .fp-inputLabel {
+      text-align: left;
+      font-weight: bold;
       padding: 5px;
     }
-    .valueCell {
-      textAlign: center;
+    .fp-valueCell {
+      text-align: center;
       padding: 10px;
     }
-    .binaryCell {
+    .fp-binaryCell {
       border: 1px solid #ccc;
       width: 20px;
       height: 20px;
       margin: 0 1px;
-      backgroundColor: white;
+      background-color: white;
       display: flex;
-      alignItems: center;
-      justifyContent: center;
+      align-items: center;
+      justify-content: center;
     }
-    .inputContainer {
+    .fp-inputContainer {
       margin: 15px 0;
       display: flex;
-      alignItems: center;
+      align-items: center;
     }
-    .inputField {
-      flex: 1,
+    .fp-inputField {
+      flex: 1;
       padding: 8px;
       border: 1px solid #ddd;
-      borderRadius: 4px;
+      border-radius: 4px;
     }
-    .buttonContainer {
+    .fp-buttonContainer {
       display: flex;
-      justifyContent: flex-end;
+      justify-content: flex-end;
       gap: 10px;
-      marginTop: 10px;
+      margin-top: 10px;
     }
-    .button {
+    .fp-button {
       padding: 8px 16px;
-      backgroundColor: #e8e8e8;
+      background-color: #e8e8e8;
       border: none;
-      borderRadius: 4px;
+      border-radius: 4px;
       cursor: pointer;
-      fontWeight: bold;
+      font-weight: bold;
     }
-    .numericButton {
+    .fp-numericButton {
       width: 40px;
       height: 40px;
-      fontSize: 16px;
+      font-size: 16px;
       display: flex;
-      alignItems: center;
-      justifyContent: center;
-      backgroundColor: #e8e8e8;
+      align-items: center;
+      justify-content: center;
+      background-color: #e8e8e8;
       border: none;
-      borderRadius: 4px;
+      border-radius: 4px;
       cursor: pointer;
-      fontWeight: bold;
-    }*/
+      font-weight: bold;
+    }

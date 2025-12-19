@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Binary Conversion</title>
+    <link rel="stylesheet" href="../include/main.css">
+    <script src="./floatingpoint.js"></script>
+  </head>
+  <body onload=setup()>
+    <main id="root" class=fp-container>
+      <div class=fp-header>IEEE 754 Converter</div>
+      
+      <div class=fp-gridContainer>
+        <div></div>
+        <div class=fp-signSection>
+          <div class=fp-sectionLabel>Sign</div>
+        </div>
+        <div class=fp-exponentSection>
+          <div class=fp-sectionLabel>Exponent</div>
+        </div>
+        <div class=fp-mantissaSection>
+          <div class=fp-sectionLabel>Mantissa</div>
+        </div>
+        
+        <!-- 2) "Value" row -->
+        <div class=fp-inputLabel>Value:</div>
+        <div class="fp-valueCell fp-signSection" id='val-sign'>
+          <!--ieeeResult.sign ? '-1' : '+1'-->
+        </div>
+        <div class="fp-valueCell fp-exponentSection" id='val-exp'>
+          <!--ieeeResult.displayExponent !== null ? (
+            <>
+              2<sup>ieeeResult.displayExponent !== -126 ? ieeeResult.displayExponent : -126</sup>
+            </>
+          ) : (
+            'N/A'
+          )-->
+        </div>
+        <div class="fp-valueCell fp-mantissaSection" id='val-man'>
+        </div>
+
+        <!-- 3) "Encoded as" row -->
+        <div class=fp-inputLabel>Encoded as:</div>
+        <div class="fp-valueCell fp-signSection" id='enc-sign'>
+        </div>
+        <div class="fp-valueCell fp-exponentSection" id=enc-exp>
+        </div>
+        <div class="fp-valueCell fp-mantissaSection" id=enc-man>
+        </div>
+
+        <!-- 4) Binary breakdown row -->
+        <div class=fp-inputLabel>Binary (with breakdown):</div>
+        <div class=fp-signSection id=bin-sign>
+        </div>
+        <div class=fp-exponentSection id=bin-exp>
+        </div>
+        <div class=fp-mantissaSection id=bin-man>
+        </div>
+      </div>
+
+     <form onsubmit="return false;" name="float">
+      <div class=fp-inputContainer>
+        <div style= width: '220px', fontWeight: 'bold' >Decimal Representation</div>
+        <input
+          type="text"
+          class=fp-inputField
+            name="decimal-value"
+          value=1
+        />
+      </div>
+
+      <div class=fp-inputContainer>
+        <div style= width: '220px', fontWeight: 'bold' >Value actually stored in float:</div>
+        <input
+          type="text"
+          class=fp-inputField
+            name='float-value'
+          value=1
+          readOnly
+        />
+        <button 
+          class=fp-numericButton 
+          onClick=handlePlusOne
+        >
+          +1
+        </button>
+      </div>
+
+      <div class=fp-inputContainer>
+        <div style= width: '220px', fontWeight: 'bold' >Binary Representation</div>
+        <input
+          type="text"
+          class=fp-inputField
+            name='binary-value'
+          value="0b0011_1111_1000_0000_0000_0000_0000_0000"
+          readOnly
+        />
+      </div>
+      
+      <div class=fp-inputContainer>
+        <div style= width: '220px', fontWeight: 'bold' >Hexadecimal Representation</div>
+        <input
+          type="text"
+          class=fp-inputField
+            name='hex-value'
+          value="0x3F80_0000"
+          readOnly
+        />
+      </div>
+    </form>
+      <div class=fp-buttonContainer>
+        <button class=fp-button onClick=random()>Random Decimal</button>
+        <button class=fp-button onClick=updateFromDecimal()>
+          Update
+        </button>
+      </div>
+    </main>
+  </body>
+</html>

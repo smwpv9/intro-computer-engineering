@@ -24,7 +24,7 @@
           </button>
         </a>
 
-        <a class="button-wrapper" href="TODO.html">
+        <a class="button-wrapper" href="./representation/floatingpoint.shtml">
           <button>
             <span class="button-text">IEEE 754</span>
             <span class="arrow">→</span>
