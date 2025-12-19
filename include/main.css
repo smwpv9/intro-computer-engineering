@@ -1,0 +1,242 @@
+main {
+    align-items: center;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    max-width: 400px;
+    margin: 0 auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+main h1 {
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+}
+.vert-container, .button-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+.button-wrapper {
+    text-decoration: none;
+    display: flex;
+}
+button {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 15px;
+    background-color: #e8e8e8;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}
+button:hover {
+    background-color: #d4d4d4;
+    transform: scale(1.02);
+}
+.button-text {
+    text-align: left;
+    flex-grow: 1;
+}
+.arrow {
+    font-size: 20px;
+}
+.back-button {
+    padding: 8px 16px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+.back-button-container {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    width: 100%;
+}
+.back-button-container a {
+    text-decoration: none;
+}
+
+.input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+    align-items: center;
+  }
+  .input {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    width: 100%;
+    max-width: 320px;
+  }
+.steps-container {
+    display: none;
+    margin-top: 20px;
+  }
+  .steps-header {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  .steps-list {
+    list-style-type: none;
+    padding: 0;
+  }
+  .step {
+    padding: 8px 0;
+    border-bottom: 1px solid #ddd;
+  }
+  .result-container {
+    display: none;
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #e8e8e8;
+    border-radius: 4px;
+  }
+  .result-label {
+    font-weight: bold;
+    margin-right: 10px;
+  }
+          .result-container {
+            width: 100%;
+            margin-top: 20px;
+            background-color: #e5e5e5;
+            border-radius: 8px;
+            padding: 15px;
+          }
+          .result-steps {
+            background-color: white;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+          }
+          .result-output {
+            background-color: white;
+            border-radius: 6px;
+            padding: 10px;
+          }
+/*
+
+.container {
+      width: 100%;
+      maxWidth: 1300px;
+      backgroundColor: #f1f1f1;
+      padding: 20px;
+      borderRadius: 8px;
+      boxShadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .header {
+      fontSize: 24px;
+      fontWeight: bold;
+      marginBottom: 20px;
+      textAlign: center;
+    }
+    
+    .gridContainer {
+      display: grid;
+      gridTemplateColumns: 220px 1fr 2fr 4fr; // 4 columns, more width for exponent/mantissa
+      rowGap: 10px;
+      alignItems: center;
+      marginBottom: 20px;
+    }
+    .sectionLabel {
+      fontWeight: bold;
+      marginBottom: 4px;
+    }
+    
+    .signSection {
+      backgroundColor: #e0e0f0;
+      textAlign: center;
+      padding: 10px;
+      display: flex;
+      justifyContent: center;
+      whiteSpace: nowrap;
+      overflowX: auto;
+    }
+    .exponentSection {
+      backgroundColor: #d0f0d0;
+      textAlign: center;
+      padding: 10px;
+      display: flex;
+      justifyContent: center;
+      whiteSpace: nowrap;
+      overflowX: auto;
+    }
+    .mantissaSection {
+      backgroundColor: #f0e0d0;
+      textAlign: center;
+      padding: 10px;
+      display: flex;
+      justifyContent: center;
+      whiteSpace: nowrap;
+      overflowX: auto;
+    }
+    .inputLabel {
+      textAlign: left;
+      fontWeight: bold;
+      padding: 5px;
+    }
+    .valueCell {
+      textAlign: center;
+      padding: 10px;
+    }
+    .binaryCell {
+      border: 1px solid #ccc;
+      width: 20px;
+      height: 20px;
+      margin: 0 1px;
+      backgroundColor: white;
+      display: flex;
+      alignItems: center;
+      justifyContent: center;
+    }
+    .inputContainer {
+      margin: 15px 0;
+      display: flex;
+      alignItems: center;
+    }
+    .inputField {
+      flex: 1,
+      padding: 8px;
+      border: 1px solid #ddd;
+      borderRadius: 4px;
+    }
+    .buttonContainer {
+      display: flex;
+      justifyContent: flex-end;
+      gap: 10px;
+      marginTop: 10px;
+    }
+    .button {
+      padding: 8px 16px;
+      backgroundColor: #e8e8e8;
+      border: none;
+      borderRadius: 4px;
+      cursor: pointer;
+      fontWeight: bold;
+    }
+    .numericButton {
+      width: 40px;
+      height: 40px;
+      fontSize: 16px;
+      display: flex;
+      alignItems: center;
+      justifyContent: center;
+      backgroundColor: #e8e8e8;
+      border: none;
+      borderRadius: 4px;
+      cursor: pointer;
+      fontWeight: bold;
+    }*/

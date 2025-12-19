@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CS252 Tools</title>
+    <link rel="stylesheet" href="./include/main.css">
+  </head>
+  <body>
+    <main id="root" class=vert-container>
+        <h1>CS252 Tools</h1>
+        <nav class="button-container">
+        <a class="button-wrapper" href="./representation/conversion.shtml">
+          <button>
+            <span class="button-text">Representation Conversions</span>
+            <span class="arrow">→</span>
+          </button>
+        </a>
+
+        <a class="button-wrapper" href="./representation/operation.shtml">
+          <button>
+            <span class="button-text">Operations</span>
+            <span class="arrow">→</span>
+          </button>
+        </a>
+
+        <a class="button-wrapper" href="TODO.html">
+          <button>
+            <span class="button-text">IEEE 754</span>
+            <span class="arrow">→</span>
+          </button>
+        </a>
+
+        <a class="button-wrapper" href="TODO.html">
+          <button>
+            <span class="button-text">Transistors</span>
+            <span class="arrow">→</span>
+          </button>
+        </a>
+
+        <a class="button-wrapper" href="TODO.html">
+          <button>
+            <span class="button-text">Logic Gates</span>
+            <span class="arrow">→</span>
+          </button>
+        </a>
+        <a class="button-wrapper" href="TODO.html">
+          <button>
+            <span class="button-text">Finite State Machines</span>
+            <span class="arrow">→</span>
+          </button>
+        </a>
+        <a class="button-wrapper" href="TODO.html">
+          <button>
+            <span class="button-text">Microarchitecture and ISA Simulator</span>
+            <span class="arrow">→</span>
+          </button>
+        </a>
+        </nav>
+    </main>
+  </body>
+</html>
