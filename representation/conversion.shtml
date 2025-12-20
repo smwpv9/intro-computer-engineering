@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -16,7 +16,7 @@
             <h1>Representation Conversion:</h1>
         </div>
         <button
-          onClick=random()
+          onClick=randomAll()
           class=button
           style="max-width: 200px"
         >
@@ -24,9 +24,9 @@
         </button>
       
       <form class=input-container onsubmit="return false;" name="conversion">
-        <div class=input>
-        <label for="fromRep">From: <label>
-        <select class=input id="fromRep" name="fromRep">
+        <div class=select>
+        <label for="fromRep">From: </label>
+        <select id="fromRep" name="fromRep">
             <option value="b10">Decimal</option>
             <option value="b2u">Unsigned Binary</option>
             <option value="b2-1">Ones Complement Binary</option>
@@ -34,9 +34,9 @@
             <option value="b16">Hexadecimal</option>
         </select>
         </div>
-        <div class=input>
-        <label for="toRep">To: <label>
-        <select class=input id="toRep" name="toRep">
+        <div class=select>
+        <label for="toRep">To: </label>
+        <select id="toRep" name="toRep">
             <option value="b10">Decimal</option>
             <option value="b2u">Unsigned Binary</option>
             <option value="b2-1">Ones Complement Binary</option>
@@ -44,9 +44,9 @@
             <option value="b16">Hexadecimal</option>
         </select>
         </div>
-        <div class=input>
-        <label for="numBits">Number of Bits: <label>
-        <select class=input id="numBits" name="numBits">
+        <div class=select>
+        <label for="numBits">Number of Bits: </label>
+        <select id="numBits" name="numBits">
             <option value="4">4</option>
             <option value="6">6</option>
             <option value="7">7</option>
@@ -63,7 +63,7 @@
           name="num"
           style="flex: 5;"
         />
-        <button onClick=randomNumber() class=button style="flex:1;">Rand</button>
+        <button onClick=randomNum() class=button style="flex:1;">Rand</button>
         </div>
         <button
           onClick=handleConvert()
