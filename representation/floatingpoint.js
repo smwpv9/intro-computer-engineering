@@ -119,8 +119,8 @@ const setIeeeResult = (ieeeResult) => {
 
     renderBinaryCells(ieeeResult);
 
-    document.forms['float']['binary-value'].value = ieeeResult.binary;
-    document.forms['float']['hex-value'].value = ieeeResult.hex;
+    document.forms['float']['binary-value'].value = '0b'+ieeeResult.binary;
+    document.forms['float']['hex-value'].value = '0x'+ieeeResult.hex;
     return;
 }
 
