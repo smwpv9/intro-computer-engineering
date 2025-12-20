@@ -80,7 +80,7 @@ const randomAll = () => {
                 break;
             case 1:
                 numChoice = randomNumber(12,false,true)
-                numChoice = numChoice.toString(16);
+                numChoice = '0x'+numChoice.toString(16);
                 break;
         }
     } else {
@@ -88,7 +88,7 @@ const randomAll = () => {
         fromRepChoice = Math.floor(Math.random() * 3) + 2;
         toRepChoice = Math.floor(Math.random() * 2);
         numChoice = randomNumber(numBitsChoice,false,true);
-        numChoice = numChoice.toString(2)
+        numChoice = '0b'+numChoice.toString(2)
     }
 
     document.forms["conversion"]["fromRep"].value = RepOptions[fromRepChoice];
@@ -109,11 +109,11 @@ const randomNum = () => {
             break;
         case 'b16':
             numChoice = randomNumber(12, false, true);
-            numChoice = numChoice.toString(16);
+            numChoice = '0x'+numChoice.toString(16);
             break;
         default:
             numChoice = randomNumber(numBitsChoice,false, true);
-            numChoice = numChoice.toString(2)
+            numChoice = '0b'+numChoice.toString(2)
             break;
     }
 
@@ -167,11 +167,11 @@ const fitToSize = (binary, numBits, trim) => {
     if(binary.length > numBits) {
         result = binary.slice(-numBits);
         stepsArray.push(`The number of bits is above what is desired.`)
-        stepsArray.push(`Trim the excess: ${result}`)
+        stepsArray.push(`Trim the excess: 0b${result}`)
         return {stepsArray, result}
     }
     result = binary.padStart(numBits, '0');
-    stepsArray.push(`Pad the left side with 0s until desired number of bits: ${result}`);
+    stepsArray.push(`Pad the left side with 0s until desired number of bits: 0b${result}`);
     return {stepsArray, result};
 };
 
@@ -186,10 +186,10 @@ const onesComplement = (binary, isNeg, ignoreSign) => {
      }
     if (isNeg) {
       result = binary.split('').map(bit => (bit === '0' ? '1' : '0')).join('');
-        stepsArray.push(`Since, the number started as negative, flip the bits: ${result}`)
+        stepsArray.push(`Since, the number started as negative, flip the bits: 0b${result}`)
       return {stepsArray, result};
     } else {
-        stepsArray.push(`Since, the number started as positive, do nothing: ${result}`)
+        stepsArray.push(`Since, the number started as positive, do nothing: 0b${result}`)
      return {stepsArray, result};
     }
 };
@@ -204,7 +204,7 @@ const twosComplement = (binary, isNeg, ignoreSign) => {
      }
     if (isNeg) {
       result = binary.split('').map(bit => (bit === '0' ? '1' : '0')).join('');
-        stepsArray.push(`Since, the number started as negative, flip the bits: ${result}`)
+        stepsArray.push(`Since, the number started as negative, flip the bits: 0b${result}`)
         let carry = 1;
           result = result.split('').map(Number);
           for (let i = result.length - 1; i >= 0; i--) {
@@ -214,10 +214,10 @@ const twosComplement = (binary, isNeg, ignoreSign) => {
           }
 
           result = result.join('');
-          stepsArray.push(`And add 1 to get: ${result}`);
+          stepsArray.push(`And add 1 to get: 0b${result}`);
       return {stepsArray, result};
     } else {
-        stepsArray.push(`Since, the number started as positive, do nothing: ${result}`)
+        stepsArray.push(`Since, the number started as positive, do nothing: 0b${result}`)
      return {stepsArray, result};
     }
 
@@ -228,7 +228,7 @@ const twosComplement = (binary, isNeg, ignoreSign) => {
 
 const unsignedToDecimal = (binary) => {
         result = 0;
-        stepsArray= [`Convert unsigned binary ${binary} to decimal`];
+        stepsArray= [`Convert unsigned binary 0b${binary} to decimal`];
 
         binary.split('').reverse().forEach((bit, index) => {
           const powerOfTwo = Math.pow(2, index);
@@ -264,7 +264,7 @@ const handleConvert = () => {
         
         result = fitToSize(result.result, numBits);
         stepsArray.push(result.stepsArray);
-        conversionResult = result.result;
+        conversionResult = '0b'+result.result;
         break;
 
 
@@ -283,7 +283,7 @@ const handleConvert = () => {
         
         result = onesComplement(result.result, isNeg, false)
         stepsArray.push(result.stepsArray);
-        conversionResult = result.result;
+        conversionResult = '0b'+result.result;
         break;
 
       case 'b10Tob2-2':
@@ -301,12 +301,12 @@ const handleConvert = () => {
 
         result = twosComplement(result.result, isNeg, false)
         stepsArray.push(result.stepsArray);
-        conversionResult = result.result;
+        conversionResult = '0b'+result.result;
         break;
 
 
       case 'b2uTob10':
-        result = fitToSize(num, numBits)
+        result = fitToSize(num.replace('0b',''), numBits)
         stepsArray.push(result.stepsArray)
         
         result = unsignedToDecimal(result.result)
@@ -315,7 +315,7 @@ const handleConvert = () => {
         break;
 
       case 'b2-1Tob10':
-        result = fitToSize(num, numBits)
+        result = fitToSize(num.replace('0b',''), numBits)
         stepsArray.push(result.stepsArray)
 
         isNeg = result.result[0] == "1";
@@ -333,7 +333,7 @@ const handleConvert = () => {
         break;
 
       case 'b2-2Tob10':
-        result = fitToSize(num, numBits)
+        result = fitToSize(num.replace('0b',''), numBits)
         stepsArray.push(result.stepsArray)
 
         isNeg = result.result[0] == "1";
@@ -354,7 +354,7 @@ const handleConvert = () => {
         case 'b16Tob2-1':
         case 'b16Tob2-2':
             // convert each digit, then apply size
-            result = num.toLowerCase();
+            result = num.toLowerCase().replace('0x','');
             groups = []
             result = result.split('').reverse().join('')
             result = result.replace(/[0-9a-f]/gi, d => {
@@ -362,17 +362,17 @@ const handleConvert = () => {
                 return fromHex[d].split('').reverse().join('')
             });
             result = result.split('').reverse().join('')
-            groups.push(`Be careful with the ordering: ${result}`)
+            groups.push(`Be careful with the ordering: 0b${result}`)
             stepsArray.push([`Convert each hex digit`].concat(groups));
             
             result = fitToSize(result,numBits, true)
             stepsArray.push(result.stepsArray)
-            conversionResult = result.result;
+            conversionResult = '0b'+result.result;
             break;
         case 'b2uTob16':
         case 'b2-1Tob16':
         case 'b2-2Tob16':
-            result = fitToSize(num, numBits, true)
+            result = fitToSize(num.replace('0b',''), numBits, true)
             stepsArray.push(result.stepsArray)
             if(result.result === 'x') break;
 
@@ -380,7 +380,7 @@ const handleConvert = () => {
             result = result.replace(/[0-1][0-1][0-1][0-1]/gi, m => m+'_')
             result = result.split('').reverse().join('')
             
-            stepsArray.push([`Group by 4 starting with the right`, `${result}`]);
+            stepsArray.push([`Group by 4 starting with the right`, `0b${result}`]);
             
             groups = []
             result = result.split('').reverse().join('')
@@ -391,7 +391,7 @@ const handleConvert = () => {
             });
             result = result.split('').reverse().join('')
             groups.push(`Be careful with the ordering`)
-            conversionResult = result
+            conversionResult = '0x'+result
 
             stepsArray.push(['Convert each group to 1 hex digit individually'].concat(groups))
             break;
