@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Logic Gates Simulation</title>
+    <link rel="stylesheet" href="./circuits.css">
+    <script src="./gates.js"></script>
+</head>
+<body>
+
+<div id="sidebar">
+    <h2 style="margin:0 0 20px 0">Logic Gates Simulation</h2>
+    
+    <label>Active Circuit:</label>
+    <select id="circuitSelector" onchange="loadCircuit(this.value)" style="width:100%; padding:10px; border-radius:4px; margin-bottom:10px;">
+        <option value="and">AND Gate</option>
+        <option value="nand">NAND Gate</option>
+        <option value="or">OR Gate</option>
+        <option value="nor">NOR Gate</option>
+        <option value="xor">XOR Gate</option>
+        <option value="xnor">XNOR Gate</option>
+        <option value="not">NOT Gate</option>
+        <option value="exploded_xor">Expanded XOR Gate</option>
+        <option value="ex1">Example Multiple Gates</option>
+        <option value="ex2">Example 2 Multiple Gates</option>
+        <option value="ex3">Example 3 Multiple Gates</option>
+    </select>
+
+    <div id="truth-table" class="table-container"></div>
+
+    <div class="btn-group">
+        <button class="btn-step" onclick="propagateStep()">Step Time</button>
+        <button class="btn-reset" onclick="resetSim()">Reset</button>
+    </div>
+</div>
+
+<div id="svg-host"></div>
+</body>
+</html>

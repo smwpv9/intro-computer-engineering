@@ -31,26 +31,26 @@
           </button>
         </a>
 
-        <a class="button-wrapper" href="TODO.html">
+        <a class="button-wrapper" href="./circuits/transistors.html">
           <button>
             <span class="button-text">Transistors</span>
             <span class="arrow">→</span>
           </button>
         </a>
 
-        <a class="button-wrapper" href="TODO.html">
+        <a class="button-wrapper" href="./circuits/gates.html">
           <button>
             <span class="button-text">Logic Gates</span>
             <span class="arrow">→</span>
           </button>
         </a>
-        <a class="button-wrapper" href="TODO.html">
+        <a class="button-wrapper" href="./TODO.html">
           <button>
             <span class="button-text">Finite State Machines</span>
             <span class="arrow">→</span>
           </button>
         </a>
-        <a class="button-wrapper" href="TODO.html">
+        <a class="button-wrapper" href="./riscv/index.html">
           <button>
             <span class="button-text">Microarchitecture and ISA Simulator</span>
             <span class="arrow">→</span>

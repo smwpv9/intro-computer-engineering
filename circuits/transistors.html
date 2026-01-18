@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Transistor Simulation</title>
+    <link rel="stylesheet" href="./circuits.css">
+    <script src="./transistors.js"></script>
+</head>
+<body>
+
+<div id="sidebar">
+    <h2 style="margin:0 0 20px 0">Transistor Simulation</h2>
+    
+    <label>Active Circuit:</label>
+    <select id="circuitSelector" onchange="loadCircuit(this.value)" style="width:100%; padding:10px; border-radius:4px; margin-bottom:10px;">
+        <option value="tran_pmos">PMOS Transistor</option>
+        <option value="tran_nmos">NMOS Transistor</option>
+        <option value="tran_not">NOT Gate</option>
+        <option value="tran_nand">NAND Gate</option>
+        <option value="tran_and">AND Gate</option>
+        <option value="tran_nor">NOR Gate</option>
+        <option value="tran_or">OR Gate</option>
+        <option value="tran_ex1">Example Multiple Gates</option>
+        <option value="tran_ex2">Example 2 Multiple Gates</option>
+        <option value="tran_ex3">Example 3 Multiple Gates</option>
+    </select>
+
+    <div id="truth-table" class="table-container"></div>
+
+    <div class="btn-group">
+        <button class="btn-step" onclick="propagateStep()">Step Time</button>
+        <button class="btn-reset" onclick="resetSim()">Reset</button>
+    </div>
+</div>
+
+<div id="svg-host"></div>
+</body>
+</html>

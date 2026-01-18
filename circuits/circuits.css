@@ -1,0 +1,38 @@
+
+:root {
+    --panel-bg: #1a202c;
+    --sidebar-bg: #2d3748;
+    --accent: #ed8936;
+    --wire-on: #ed8936;
+    --wire-off: #cbd5e0;
+    --wire-conflict: red;
+    --unknown: #4a5568;
+}
+
+body { font-family: 'Inter', system-ui, sans-serif; margin: 0; display: flex; height: 100vh; background: #f8fafc; }
+
+/* Sidebar UI */
+#sidebar { width: 350px; background: var(--sidebar-bg); color: white; padding: 25px; display: flex; flex-direction: column; box-shadow: 4px 0 15px rgba(0,0,0,0.2); }
+
+.table-container { flex-grow: 1; margin: 20px 0; overflow-y: auto; background: #1a202c; border-radius: 8px; border: 1px solid #4a5568; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th, td { padding: 10px; border-bottom: 1px solid #2d3748; text-align: center; }
+.active-row { background: #2d3748; border-left: 4px solid var(--accent); }
+
+/* Canvas */
+#svg-host { flex-grow: 1; display: flex; align-items: center; justify-content: center; position: relative; }
+#svg-host svg { max-width: 100%; max-height: 100%; height: fit-content; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1)); }
+
+/* Logic Classes (Targets SVG IDs) */
+.logic-wire { fill: none; stroke: var(--unknown); stroke-width: 3; transition: stroke 0.3s; }
+.logic-wire.on { stroke: var(--wire-on); /*stroke-dasharray: 8; animation: flow 1s linear infinite;*/ }
+.logic-wire.off { stroke: var(--wire-off); }
+.logic-wire.conflict {stroke: var(--wire-conflict); }
+@keyframes flow { from { stroke-dashoffset: 16; } to { stroke-dashoffset: 0; } }
+.hide { display: none; }
+
+.btn-group { display: flex; gap: 10px; }
+button { flex: 1; padding: 15px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
+.btn-step { background: var(--accent); color: white; }
+.btn-reset { background: #718096; color: white; }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
