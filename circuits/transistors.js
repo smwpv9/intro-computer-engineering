@@ -51,8 +51,8 @@ const circuitManifest = {
         logic: [
 	        { id: "P1", type: "PMOS", gate: ["A"], power: ["S1"] },
 	        { id: "P2", type: "PMOS", gate: ["B"], power: ["S2"] },
-	        { id: "N1", type: "NMOS", gate: ["A"], power: ["N2"] },
-	        { id: "N2", type: "NMOS", gate: ["B"], power: ["G1"] }
+	        { id: "N2", type: "NMOS", gate: ["B"], power: ["G1"] },
+	        { id: "N1", type: "NMOS", gate: ["A"], power: ["N2"] }
         ],
         nets: {
             "wire-A": ["A"],
@@ -71,8 +71,8 @@ const circuitManifest = {
         logic: [
 	        { id: "P1", type: "PMOS", gate: ["A"], power: ["S1"] },
 	        { id: "P2", type: "PMOS", gate: ["B"], power: ["S2"] },
-	        { id: "N1", type: "NMOS", gate: ["A"], power: ["N2"] },
 	        { id: "N2", type: "NMOS", gate: ["B"], power: ["G1"] },
+	        { id: "N1", type: "NMOS", gate: ["A"], power: ["N2"] },
 	        { id: "P3", type: "PMOS", gate: ["P1", "P2", "N1"], power: ["S3"] },
 	        { id: "N3", type: "NMOS", gate: ["P1", "P2", "N1"], power: ["G2"] }
         ],
@@ -241,7 +241,7 @@ async function loadCircuit(filename) {
         config.inputs.forEach(id => state.nodeValues[id] = 0);
         config.power.forEach(sourceId => state.nodeValues[sourceId] = 1);
         config.ground.forEach(groundId => state.nodeValues[groundId] = 0);
-        config.logic.forEach(gate => state.nodeValues[gate.id] = null);
+        config.logic.forEach(tran => state.nodeValues[tran.id] = null);
 
         setupInteraction();
         updateDisplay();
@@ -278,11 +278,19 @@ function propagateStep() {
 
     config.logic.forEach(tran => {
         const gateValues = tran.gate.map(srcId => state.nodeValues[srcId]);
+        const powerValues = tran.power.map(srcId => state.nodeValues[srcId]);
+        let powerValue = null;
+        if(powerValues.some(v => v === 0 || v >= 2))
+            powerValue = 0;
+        if(powerValues.some(v => v === 1 || v >= 2))
+            powerValue = 1;
+        if(powerValues.every(v => v >= 2))
+            powerValue = 3
 
         // Only calculate if all source inputs are known (0 or 1)
         if (gateValues.every(v => v !== null)) {
-            if (tran.type === "PMOS") nextValues[tran.id] = gateValues.every(v => v === 0 || v === 2) ? 1 : 2;
-            if (tran.type === "NMOS") nextValues[tran.id] = gateValues.every(v => v === 1 || v === 2) ? 0 : 2;
+            if (tran.type === "PMOS") nextValues[tran.id] = gateValues.every(v => v === 0 || v >= 2) ? powerValue : 2;
+            if (tran.type === "NMOS") nextValues[tran.id] = gateValues.every(v => v === 1 || v >= 2) ? powerValue : 2;
         }
     });
 
@@ -307,6 +315,7 @@ function updateDisplay() {
             if(state.nodeValues[tran.id] === null || state.nodeValues[tran.id] === 2) el.setAttribute('class', "hide");
             else if(state.nodeValues[tran.id] === 0) el.setAttribute('class', "logic-wire off");
             else if(state.nodeValues[tran.id] === 1) el.setAttribute('class', "logic-wire on");
+            else if(state.nodeValues[tran.id] === 3) el.setAttribute('class', "logic-wire");
     });
 
     // 3. Resolve and Update Nets
@@ -324,6 +333,8 @@ function updateDisplay() {
             finalState = 1;
         } else if (driverValues.includes(null)) {
             finalState = null; 
+        } else if (driverValues.every(v => v === 2)) {
+            finalState = null;
         }
 
         const wireEl = document.getElementById(netId);
@@ -333,7 +344,7 @@ function updateDisplay() {
             else if (finalState === 0) className += ' off';
             
             // OPTIONAL: Add a conflict class if multiple drivers disagree
-            const activeDrivers = driverValues.filter(v => v !== null && v !== 2);
+            const activeDrivers = driverValues.filter(v => v !== null).filter(v => v !== 2).filter(v => v !== 3);
             const isConflict = new Set(activeDrivers).size > 1;
             if (isConflict) className += ' conflict'; 
 
@@ -351,4 +362,4 @@ function renderTruthTable() {
 
 function resetSim() { loadCircuit(state.currentKey); }
 
-loadCircuit("tran_nand");
+loadCircuit("tran_pmos");
