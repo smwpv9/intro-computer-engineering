@@ -133,7 +133,7 @@ const binaryAdd = (binary1, binary2) => {
     let remainder = parseInt(msbCarryIn, 10) ^ parseInt(msbCarryOut, 10);
     let remainderSteps = `Signed: Carry in ${msbCarryIn} XOR Carry out ${msbCarryOut}: ${remainder}<br/>Unsigned: Carry out ${msbCarryOut}: ${msbCarryOut}`;
     remainder = remainder ? "Yes singed overflow occured" : "No signed overflow"
-    remainder += msbCarryOut ? "<br/>Yes unsigned overflow occured" : "<br/>No unsigned overflow"
+    remainder += msbCarryOut !== '0' ? "<br/>Yes unsigned overflow occured" : "<br/>No unsigned overflow"
 
     return { result, steps, remainder, remainderSteps };
   };

@@ -126,12 +126,12 @@ const decimalToUnsigned = (num) => {
     let stepsArray = [`Convert to unsigned binary from ${num}`];
     let result = 0;
 
-    stepsArray.push(`Don't worry about the number of bits yet. This method is repeated division until we reach 0 quotient.`);
     if(num < 0) {
         stepsArray.push(`Unsigned binary cannot represent negative values. This conversion fails`);
         result = 'x'
         return {stepsArray, result};
     }
+    stepsArray.push(`Don't worry about the number of bits yet. This method is repeated division by 2 until we reach 0 quotient.`);
     let binarySteps = [];
 
     let position = 0;
@@ -179,31 +179,30 @@ const onesComplement = (binary, isNeg, ignoreSign) => {
     let stepsArray = [`Apply the one's complement rules`];
     let result = binary;
 
-      if(binary[0] === `1` && !ignoreSign) {
-        stepsArray.push(`Unfortunately, one's complement uses the MSB as a sign bit so it must be zero at the start of this step.`, `This conversion fails.`)
-        result =  binary.replaceAll(/./g,'x')
-        return {stepsArray, result}
-     }
     if (isNeg) {
       result = binary.split('').map(bit => (bit === '0' ? '1' : '0')).join('');
         stepsArray.push(`Since, the number started as negative, flip the bits: 0b${result}`)
-      return {stepsArray, result};
     } else {
         stepsArray.push(`Since, the number started as positive, do nothing: 0b${result}`)
-     return {stepsArray, result};
     }
+    if(isNeg & result[0] !== `1` && !ignoreSign) {
+        stepsArray.push(`One's complement uses the MSB as a sign bit so it must be the desired value at the end of this step: Neg is 1 and Pos is 0.`, `This conversion fails.`)
+        result =  binary.replaceAll(/./g,'x')
+     }
+
+    return {stepsArray, result}
 };
 
 const twosComplement = (binary, isNeg, ignoreSign) => {
     let stepsArray = [`Apply the two's complement rules`]
+    let result = binary;
 
-    if(binary[0] === `1` && !ignoreSign) {
-        stepsArray.push(`Unfortunately, two's complement uses the MSB as a sign bit so it must be zero at the start of this step.`, `This conversion fails.`)
-        result =  binary.replaceAll(/./g,'x')
+    /*if(binary[0] === `1` && !ignoreSign) {
+        
         return {stepsArray, result}
-     }
+     }*/
     if (isNeg) {
-      result = binary.split('').map(bit => (bit === '0' ? '1' : '0')).join('');
+        result = result.split('').map(bit => (bit === '0' ? '1' : '0')).join('');
         stepsArray.push(`Since, the number started as negative, flip the bits: 0b${result}`)
         let carry = 1;
           result = result.split('').map(Number);
@@ -215,19 +214,20 @@ const twosComplement = (binary, isNeg, ignoreSign) => {
 
           result = result.join('');
           stepsArray.push(`And add 1 to get: 0b${result}`);
-      return {stepsArray, result};
     } else {
         stepsArray.push(`Since, the number started as positive, do nothing: 0b${result}`)
-     return {stepsArray, result};
+    }
+    if(isNeg && result[0] !== `1` && !ignoreSign) {
+        stepsArray.push(`Two's complement uses the MSB as a sign bit so it must be the desired value at the end of this step: Neg is 1 and Pos is 0.`, `This conversion fails.`)
+        result =  result.replaceAll(/./g,'x')
     }
 
 
-
-          
+    return {stepsArray, result};
 };
 
 const unsignedToDecimal = (binary) => {
-        result = 0;
+        let result = 0;
         stepsArray= [`Convert unsigned binary 0b${binary} to decimal`];
 
         binary.split('').reverse().forEach((bit, index) => {
@@ -252,7 +252,7 @@ const handleConvert = () => {
     let numBits = document.forms["conversion"]["numBits"].value
     let num = document.forms["conversion"]["num"].value
     num = num.replaceAll('_','');
-    let conversionResult = 'x'.repeat(numBits);
+    let conversionResult = "0b"+'x'.repeat(numBits);
 
 
     switch ((fromRep + "To" + toRep)) {
