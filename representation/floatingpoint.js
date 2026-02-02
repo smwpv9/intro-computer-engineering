@@ -96,8 +96,9 @@ const [decimalValue, setDecimalValue] = useState('0');
   };
 
   const handlePlusOne = () => {
-    const currentValue = parseFloat(storedValue) || 0;
-    setDecimalValue((currentValue + 1).toString());
+    console.log("calling");
+    const currentValue = parseFloat(document.forms['float']['decimal-value'].value);
+    document.forms['float']['decimal-value'].value = (currentValue + 1).toString();
   };
 
 const setIeeeResult = (ieeeResult) => {
@@ -151,7 +152,6 @@ document.getElementById("bin-man").innerHTML = `<div style="display: flex; justi
 
 const setup = () => {
     document.forms["float"]["decimal-value"].value = 1;
-    console.log('called')
     updateFromDecimal();
     return;
 }

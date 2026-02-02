@@ -74,14 +74,14 @@
         <div style= width: '220px', fontWeight: 'bold' >Value actually stored in float:</div>
         <input
           type="text"
-          class=fp-inputField
+          class=fp-readonlyField
             name='float-value'
           value=1
           readOnly
         />
         <button 
           class=fp-numericButton 
-          onClick=handlePlusOne
+          onClick=handlePlusOne()
         >
           +1
         </button>
@@ -91,7 +91,7 @@
         <div style= width: '220px', fontWeight: 'bold' >Binary Representation</div>
         <input
           type="text"
-          class=fp-inputField
+          class=fp-readonlyField
             name='binary-value'
           value="0b0011_1111_1000_0000_0000_0000_0000_0000"
           readOnly
@@ -102,7 +102,7 @@
         <div style= width: '220px', fontWeight: 'bold' >Hexadecimal Representation</div>
         <input
           type="text"
-          class=fp-inputField
+          class=fp-readonlyField
             name='hex-value'
           value="0x3F80_0000"
           readOnly

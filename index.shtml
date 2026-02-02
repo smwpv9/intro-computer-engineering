@@ -3,12 +3,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>CS252 Tools</title>
+    <title>CS252 Introduction to Computer Engineering</title>
     <link rel="stylesheet" href="./include/main.css">
   </head>
   <body>
     <main id="root" class=vert-container>
-        <h1>CS252 Tools</h1>
+        <h1>CS252 Introduction to Computer Engineering</h1>
+        <p>Welcome to the course website for Introduction to Computer Engineering. This hosts all of the material outsite of lectures and Canvas assignments.The tools below provide exploration areas for many topics throughout the course.<br/>The textbook can be found <a href="./CS252_Course_Notes.pdf">here</a>.</p>
+        <h2>Tools</h2>
         <nav class="button-container">
         <a class="button-wrapper" href="./representation/conversion.shtml">
           <button>
@@ -19,7 +21,7 @@
 
         <a class="button-wrapper" href="./representation/operation.shtml">
           <button>
-            <span class="button-text">Operations</span>
+            <span class="button-text">Binary Operations</span>
             <span class="arrow">→</span>
           </button>
         </a>
@@ -37,10 +39,15 @@
             <span class="arrow">→</span>
           </button>
         </a>
-
         <a class="button-wrapper" href="./circuits/gates.html">
           <button>
             <span class="button-text">Logic Gates</span>
+            <span class="arrow">→</span>
+          </button>
+        </a>
+        <a class="button-wrapper" href="./circuits/TODO.html">
+          <button>
+            <span class="button-text">Sequential Circuits</span>
             <span class="arrow">→</span>
           </button>
         </a>
@@ -57,6 +64,8 @@
           </button>
         </a>
         </nav>
+        <p>Contributors: Arushi Dodhia, Tyler Richard, Karu Sankaralingam, and Shayne Wadle</p>
+        <p>If you are an instructor looking to use this material including the Canvas course, please reach out to karu@cs.wisc.edu and swadle@wisc.edu.</p>
     </main>
   </body>
 </html>

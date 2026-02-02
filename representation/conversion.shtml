@@ -9,12 +9,13 @@
   </head>
   <body>
     <main id="root" class=vert-container>
-        <div class=back-button-container>
+        <!--<div class=back-button-container>
             <a href="../index.shtml">
                 <button class=back-button>←</button>
             </a>
-            <h1>Representation Conversion:</h1>
-        </div>
+        </div>-->
+
+        <h1>Representation Conversion:</h1>
         <button
           onClick=randomAll()
           class=button
