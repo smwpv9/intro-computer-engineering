@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="./circuits.css">
     <script src="./transistors.js"></script>
 </head>
-<body>
+<body onload="loadCircuit('tran_pmos')">
 
 <div id="sidebar">
     <h2 style="margin:0 0 20px 0">Transistor Simulation</h2>
@@ -20,6 +20,8 @@
         <option value="tran_and">AND Gate</option>
         <option value="tran_nor">NOR Gate</option>
         <option value="tran_or">OR Gate</option>
+        <!--<option value="tran_cout">Carry Out</option>
+        <option value="tran_sum">Sum</option>-->
         <option value="tran_ex1">Example Multiple Gates</option>
         <option value="tran_ex2">Example 2 Multiple Gates</option>
         <option value="tran_ex3">Example 3 Multiple Gates</option>
@@ -28,8 +30,8 @@
     <div id="truth-table" class="table-container"></div>
 
     <div class="btn-group">
-        <button class="btn-step" onclick="propagateStep()">Step Time</button>
-        <button class="btn-reset" onclick="resetSim()">Reset</button>
+        <button class="btn-random" onclick="random()">Random Inputs</button>
+        <button class="btn-reset" onclick="zero()">Zero Inputs</button>
     </div>
 </div>
 

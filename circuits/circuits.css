@@ -24,6 +24,9 @@ th, td { padding: 10px; border-bottom: 1px solid #2d3748; text-align: center; }
 #svg-host svg { max-width: 100%; max-height: 100%; height: fit-content; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1)); }
 
 /* Logic Classes (Targets SVG IDs) */
+.on { fill: var(--wire-on); }
+.off { fill: var(--wire-off); }
+.confict {fill: var(--wire-conflict); }
 .logic-wire { fill: none; stroke: var(--unknown); stroke-width: 3; transition: stroke 0.3s; }
 .logic-wire.on { stroke: var(--wire-on); /*stroke-dasharray: 8; animation: flow 1s linear infinite;*/ }
 .logic-wire.off { stroke: var(--wire-off); }
@@ -33,6 +36,7 @@ th, td { padding: 10px; border-bottom: 1px solid #2d3748; text-align: center; }
 
 .btn-group { display: flex; gap: 10px; }
 button { flex: 1; padding: 15px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
-.btn-step { background: var(--accent); color: white; }
+.btn-select { padding: 5px;}
+.btn-random { background: var(--accent); color: white; }
 .btn-reset { background: #718096; color: white; }
 button:disabled { opacity: 0.5; cursor: not-allowed; }
