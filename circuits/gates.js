@@ -204,7 +204,7 @@ const circuitManifest = {
 			"A8": ["wire-A8-O1"],
             "O1": ["wire-O1-X"]
 		},
-        truth: (inp) => [(!inp[0] & !inp[1] & inp[0]) |(!inp[0] & inp[1] & inp[1]) |(inp[0] & !inp[1] & inp[2]) |(inp[0] & inp[1] & inp[3])]
+        truth: (inp) => [(!inp[0] & !inp[1] & inp[2]) |(!inp[0] & inp[1] & inp[3]) |(inp[0] & !inp[1] & inp[4]) |(inp[0] & inp[1] & inp[5])]
 	},
 	"full_adder": {
 		inputs: ["A", "B", "Ci"],	
@@ -222,7 +222,7 @@ const circuitManifest = {
 		visualMap: {
 			"A": ["wire-A", "wire-A-X1", "wire-A-A2"],
 			"B": ["wire-B-X1", "wire-B-A2"],
-            "Ci": ["wire-Ci-A1", "wire-Ci-X1"],
+            "Ci": ["wire-Ci-A1", "wire-Ci-X2"],
 			"X1": ["wire-X1-X2", "wire-X1-A1"],
 			"X2": ["wire-X2-S"],
 			"A1": ["wire-A1-O1"],
@@ -234,12 +234,12 @@ const circuitManifest = {
 	"ripple_carry": {
 		inputs: ["A0", "A1", "A2", "A3", "B0", "B1", "B2", "B3"],	
         outputs: [
-            {id: "S0", sources: "FAS0" },
-            {id: "S1", sources: "FAS1" },
-            {id: "S2", sources: "FAS2" },
-            {id: "S3", sources: "FAS3" },
             {id: "O", sources: "X1" },
             {id: "U", sources: "FAC3" },
+            {id: "S3", sources: "FAS3" },
+            {id: "S2", sources: "FAS2" },
+            {id: "S1", sources: "FAS1" },
+            {id: "S0", sources: "FAS0" }
         ],	
 		logic: [
             { id: "FAS0", type: "SUM", sources: ["A0", "B0"] },
@@ -271,7 +271,12 @@ const circuitManifest = {
             "FAC3": ["wire-FA3-U", "wire-FA3-X1"],
 			"X1": ["wire-X1-O"]
 		},
-        truth: (inp) => [!(inp[0] & inp[1])]
+        truth: (inp) => [Number((inp[0]+inp[4]+inp[1]*2+inp[5]*2+inp[2]*4+inp[6]*4+inp[3]*8+inp[7]*8) >= 16),
+                        Number((inp[3] == inp[7]) & (inp[3] != Number(Math.floor((inp[0]+inp[4]+inp[1]*2+inp[5]*2+inp[2]*4+inp[6]*4+inp[3]*8+inp[7]*8)/8))%2)),
+                        Number(Math.floor((inp[0]+inp[4]+inp[1]*2+inp[5]*2+inp[2]*4+inp[6]*4+inp[3]*8+inp[7]*8)/8)%2),
+                        Number(Math.floor((inp[0]+inp[4]+inp[1]*2+inp[5]*2+inp[2]*4+inp[6]*4)/4)%2),
+                        Number(Math.floor((inp[0]+inp[4]+inp[1]*2+inp[5]*2)/2)%2),
+                        inp[0]^inp[4]]
 	},
 	"ex1": {
 		inputs: ["A", "B", "C"],	
@@ -290,7 +295,7 @@ const circuitManifest = {
 			"B": ["wire-B-A1", "wire-B-O1"],
             "C": ["wire-C-O1"],
 			"A1": ["wire-A1-N1"],
-			"N2": ["wire-N1-O2"],
+			"N1": ["wire-N1-O2"],
 			"O1": ["wire-O1-A2"],
 			"O2": ["wire-O2-A2"],
 			"A2": ["wire-A2-X"]
@@ -314,7 +319,7 @@ const circuitManifest = {
 			"B": ["wire-B-A1", "wire-B-O1"],
             "C": ["wire-C-O1"],
 			"A1": ["wire-A1-N1"],
-			"N2": ["wire-N1-O2"],
+			"N1": ["wire-N1-O2"],
 			"O1": ["wire-O1-A2"],
 			"O2": ["wire-O2-A2"],
 			"A2": ["wire-A2-X"]
@@ -338,12 +343,12 @@ const circuitManifest = {
 			"B": ["wire-B-A1", "wire-B-O1"],
             "C": ["wire-C-O1"],
 			"A1": ["wire-A1-N1"],
-			"N2": ["wire-N1-O2"],
+			"N1": ["wire-N1-O2"],
 			"O1": ["wire-O1-A2"],
 			"O2": ["wire-O2-A2"],
 			"A2": ["wire-A2-X"]
 		},
-        truth: (inp) => [!((inp[0] | !(inp[0] & inp[1])) & (inp[1] | inp[2]))]
+        truth: (inp) => [Number(!((inp[0] | !(inp[0] & inp[1])) & (inp[1] | inp[2])))]
 	}
 };
 
@@ -423,16 +428,16 @@ function propagate() {
             // Only calculate if all source inputs are known (0 or 1)
             if (inputValues.every(v => v !== null)) {
                 switch(gate.type) {
-                	case "AND":     nextValues[gate.id] = inputValues.every(v => v === 1) ? 1 : 0;
-                	case "NAND":    nextValues[gate.id] = inputValues.every(v => v === 1) ? 0 : 1;
-                	case "OR":      nextValues[gate.id] = inputValues.some(v => v === 1) ? 1 : 0;
-                	case "NOR":     nextValues[gate.id] = inputValues.some(v => v === 1) ? 0 : 1;
-                	case "NOT":     nextValues[gate.id] = inputValues[0] === 0 ? 1 : 0;
-                	case "YES":     nextValues[gate.id] = inputValues[0];
-                	case "XOR":     nextValues[gate.id] = inputValues[0] ^ inputValues[1];
-                    case "XNOR":    nextValues[gate.id] = inputValues[0] == inputValues[1];
-                    case "CARRY":   nextValues[gate.id] = Math.floor((inputValues[0]+inputValues[1]+inputValues[2])/2);
-                    case "SUM":     nextValues[gate.id] = (inputValues[0]+inputValues[1]+inputValues[2])%2;
+                	case "AND":     nextValues[gate.id] = inputValues.every(v => v === 1) ? 1 : 0; break;
+                	case "NAND":    nextValues[gate.id] = inputValues.every(v => v === 1) ? 0 : 1; break;
+                	case "OR":      nextValues[gate.id] = inputValues.some(v => v === 1) ? 1 : 0; break;
+                	case "NOR":     nextValues[gate.id] = inputValues.some(v => v === 1) ? 0 : 1; break;
+                	case "NOT":     nextValues[gate.id] = inputValues[0] === 0 ? 1 : 0; break;
+                	case "YES":     nextValues[gate.id] = inputValues[0]; break;
+                	case "XOR":     nextValues[gate.id] = inputValues[0] ^ inputValues[1]; break;
+                    case "XNOR":    nextValues[gate.id] = Number(inputValues[0] == inputValues[1]); break;
+                    case "CARRY":   nextValues[gate.id] = Math.floor(( inputValues.reduce((acc,curr)=>acc+curr,0) )/2); break;
+                    case "SUM":     nextValues[gate.id] = (inputValues.reduce((acc,curr)=>acc+curr,0))%2; break;
                 }
             }
         });
@@ -477,12 +482,12 @@ function renderTruthTable() {
     const config = circuitManifest[state.currentKey];
     const inputs = config.inputs;
     const container = document.getElementById('truth-table');
-    let html = `<table><tr>${inputs.map(i => `<th>${i}</th>`).join('')}${config.outputs.map(i=> `<th>${i.id}</th>`)}<th></th></tr>`;
+    let html = `<table><tr>${inputs.map(i => `<th>${i}</th>`).join('')}${config.outputs.map(i=> `<th>${i.id}</th>`).join('')}<th></th></tr>`;
     
     for(let i=0; i < Math.pow(2, inputs.length); i++) {
         const bits = i.toString(2).padStart(inputs.length, '0').split('').map(Number);
         const active = bits.every((b, idx) => b === state.nodeValues[inputs[idx]]);
-        html += `<tr class="${active ? 'active-row' : ''}">${bits.map(b => `<td>${b}</td>`).join('')}<td>${config.truth(bits).map(Number)}</td><td><button class="btn-select" onclick='selectRow([${bits}])'>select</button></td></tr>`;
+        html += `<tr class="${active ? 'active-row' : ''}">${bits.map(b => `<td>${b}</td>`).join('')}${config.truth(bits).map(bit => `<td>${bit}</td>`).join('')}<td><button class="btn-select" onclick='selectRow([${bits}])'>select</button></td></tr>`;
     }
     container.innerHTML = html + `</table>`;
 }

@@ -243,18 +243,18 @@ const circuitManifest = {
             { id: "wire-A", source: ["A"] },
             { id: "wire-B", source: ["B"] },
             { id: "wire-S1-P1", source: ["S1"] },
-            { id: "wire-P1-P2", source: ["P1"] },
-            { id: "wire-G1-N1", source: ["G1"] },
-            { id: "wire-G2-N2", source: ["G2"] },
-            { id: "wire-C1", source: ["P2", "N1", "N2"] },
-            { id: "wire-S2-P3", source: ["S2"] },
-            { id: "wire-G3-N3", source: ["G3"] },
+            { id: "wire-S2-P2", source: ["S2"] },
+            { id: "wire-G1-N2", source: ["G1"] },
+            { id: "wire-N2-N1", source: ["N2"] },
+            { id: "wire-C1", source: ["P1", "P2", "N1"] },
+            { id: "wire-S3-P3", source: ["S2"] },
+            { id: "wire-G2-N3", source: ["G2"] },
             { id: "wire-C2", source: ["P3", "N3"] },
             { id: "wire-S4-P4", source: ["S4"] },
             { id: "wire-P4-P5", source: ["P4"] },
-            { id: "wire-G3-N4", source: ["G4"] },
-            { id: "wire-G4-N5", source: ["G5"] },
-            { id: "wire-C", sourece: ["C"] },
+            { id: "wire-G3-N4", source: ["G3"] },
+            { id: "wire-G4-N5", source: ["G4"] },
+            { id: "wire-C", source: ["C"] },
             { id: "wire-C3-X", source: ["P5", "N4", "N5"] }
         ],
         truth: (inp) => [!((inp[0] & inp[1]) | inp[2])]
@@ -312,8 +312,8 @@ const circuitManifest = {
             { id: "N3", type: "NMOS", gate: ["C"], power: ["G1"] },
 	        { id: "N2", type: "NMOS", gate: ["B"], power: ["N3"] },
 	        { id: "N1", type: "NMOS", gate: ["A"], power: ["N2"] },
-	        { id: "P4", type: "PMOS", gate: ["P1", "P2", "P3", "N3"], power: ["S4"] },
-	        { id: "N4", type: "NMOS", gate: ["P1", "P2", "P3", "N3"], power: ["G2"] }
+	        { id: "P4", type: "PMOS", gate: ["P1", "P2", "P3", "N1"], power: ["S4"] },
+	        { id: "N4", type: "NMOS", gate: ["P1", "P2", "P3", "N1"], power: ["G2"] }
         ],
         nets: [
             { id: "wire-A", source: ["A"] },
@@ -325,7 +325,7 @@ const circuitManifest = {
             { id: "wire-G1-N3", source: ["G1"] },
             { id: "wire-N3-N2", source: ["N3"] },
             { id: "wire-N2-N1", source: ["N2"] },
-            { id: "wire-C1", source: ["P1", "P2", "P3", "N3"] },
+            { id: "wire-C1", source: ["P1", "P2", "P3", "N1"] },
             { id: "wire-S4-P4", source: ["S4"] },
             { id: "wire-G2-N4", source: ["G2"] },
             { id: "wire-C2-X", source: ["P4", "N4"] }
@@ -430,11 +430,11 @@ function propagate() {
         // - If any driver is 1, the net is 1 (Wired-OR behavior)
         // - If all drivers are 0, the net is 0
         // - If any driver is null and no driver is 1, the net is unknown
-        let finalState = 0;
+        let finalState = null;
         if (driverValues.includes(1)) {
             finalState = 1;
-        } else if (driverValues.includes(null)) {
-            finalState = null; 
+        } else if (driverValues.includes(0)) {
+            finalState = 0; 
         } else if (driverValues.every(v => v === 2)) {
             finalState = null;
         }
