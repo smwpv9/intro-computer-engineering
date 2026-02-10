@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Finite State Machines</title>
+    <link rel="stylesheet" href="../include/main.css">
+  </head>
+  <body>
+    <main id="root" class=vert-container>
+        <h1>Finite State Machines</h1>
+        <nav class="button-container">
+        <a class="button-wrapper" href="./fsm-turnstile.html">
+          <button>
+            <span class="button-text">🚪 Turnstile FSM</span>
+            <span class="arrow">→</span>
+          </button>
+        </a>
+
+        <a class="button-wrapper" href="./fsm-combination-lock.html">
+          <button>
+            <span class="button-text">🔐 Combination Lock FSM</span>
+            <span class="arrow">→</span>
+          </button>
+        </a>
+
+        <a class="button-wrapper" href="./fsm-sequence-detector.html">
+          <button>
+            <span class="button-text">🔍 Sequence Detector FSM</span>
+            <span class="arrow">→</span>
+          </button>
+        </a>
+
+        <a class="button-wrapper" href="./fsm-traffic-light.html">
+          <button>
+            <span class="button-text">🚦 Simple Traffic Light Controller</span>
+            <span class="arrow">→</span>
+          </button>
+        </a>
+        </nav>
+    </main>
+  </body>
+</html>

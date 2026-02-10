@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FSM: Traffic Light Controller</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ef4444 0%, #fbbf24 50%, #22c55e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            font-size: 1rem;
+            color: #888;
+        }
+        
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 2rem;
+        }
+        
+        @media (max-width: 900px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .panel {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+        
+        .panel-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #fbbf24;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        
+        /* Traffic Light Visual */
+        .traffic-light-container {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-bottom: 2rem;
+        }
+        
+        .light-assembly {
+            text-align: center;
+        }
+        
+        .light-label {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .traffic-light {
+            background: #1a1a1a;
+            border: 4px solid #333;
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .light {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 3px solid #222;
+            transition: all 0.3s ease;
+        }
+        
+        .light.red {
+            background: #3a1a1a;
+        }
+        
+        .light.red.on {
+            background: radial-gradient(circle at 30% 30%, #ff6b6b, #ef4444, #dc2626);
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.8), 0 0 60px rgba(239, 68, 68, 0.4);
+        }
+        
+        .light.yellow {
+            background: #3a3a1a;
+        }
+        
+        .light.yellow.on {
+            background: radial-gradient(circle at 30% 30%, #fde047, #fbbf24, #f59e0b);
+            box-shadow: 0 0 30px rgba(251, 191, 36, 0.8), 0 0 60px rgba(251, 191, 36, 0.4);
+        }
+        
+        .light.green {
+            background: #1a3a1a;
+        }
+        
+        .light.green.on {
+            background: radial-gradient(circle at 30% 30%, #4ade80, #22c55e, #16a34a);
+            box-shadow: 0 0 30px rgba(34, 197, 94, 0.8), 0 0 60px rgba(34, 197, 94, 0.4);
+        }
+        
+        /* State Diagram */
+        .diagram-container {
+            display: flex;
+            justify-content: center;
+        }
+        
+        .diagram-svg {
+            width: 100%;
+            max-width: 550px;
+            height: 280px;
+        }
+        
+        .state-circle {
+            fill: #2d2d2d;
+            stroke: #444;
+            stroke-width: 3;
+            transition: all 0.3s ease;
+        }
+        
+        .state-circle.active {
+            stroke: #fbbf24;
+            filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.5));
+        }
+        
+        .state-circle.red-state { fill: rgba(239, 68, 68, 0.2); }
+        .state-circle.yellow-state { fill: rgba(251, 191, 36, 0.2); }
+        .state-circle.green-state { fill: rgba(34, 197, 94, 0.2); }
+        
+        .state-circle.red-state.active { stroke: #ef4444; filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.5)); }
+        .state-circle.yellow-state.active { stroke: #fbbf24; filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.5)); }
+        .state-circle.green-state.active { stroke: #22c55e; filter: drop-shadow(0 0 10px rgba(34, 197, 94, 0.5)); }
+        
+        .state-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 600;
+            fill: #fff;
+            text-anchor: middle;
+        }
+        
+        .transition-path {
+            fill: none;
+            stroke: #555;
+            stroke-width: 2;
+        }
+        
+        .transition-path.active {
+            stroke: #fbbf24;
+            stroke-width: 3;
+        }
+        
+        .transition-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            fill: #888;
+        }
+        
+        /* Control Panel */
+        .timer-display {
+            background: #000;
+            border: 3px solid #333;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .timer-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 3rem;
+            font-weight: 700;
+            color: #fbbf24;
+            text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+        }
+        
+        .timer-label {
+            font-size: 0.8rem;
+            color: #666;
+            text-transform: uppercase;
+            margin-top: 0.5rem;
+        }
+        
+        .control-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .control-btn {
+            padding: 0.75rem 1rem;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            border: 2px solid #444;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .control-btn.play {
+            border-color: #22c55e;
+            color: #22c55e;
+        }
+        
+        .control-btn.play:hover {
+            background: rgba(34, 197, 94, 0.2);
+        }
+        
+        .control-btn.pause {
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+        
+        .control-btn.pause:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+        
+        .control-btn.step {
+            border-color: #fbbf24;
+            color: #fbbf24;
+        }
+        
+        .control-btn.step:hover {
+            background: rgba(251, 191, 36, 0.2);
+        }
+        
+        .speed-control {
+            margin-bottom: 1.5rem;
+        }
+        
+        .speed-label {
+            font-size: 0.8rem;
+            color: #888;
+            margin-bottom: 0.5rem;
+        }
+        
+        .speed-slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #333;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .speed-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #fbbf24;
+            cursor: pointer;
+        }
+        
+        /* Info */
+        .info-box {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .info-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #fbbf24;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        
+        .info-text {
+            font-size: 0.85rem;
+            color: #ccc;
+            line-height: 1.5;
+        }
+        
+        /* State Table */
+        .state-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            margin-top: 1rem;
+        }
+        
+        .state-table th {
+            background: rgba(251, 191, 36, 0.2);
+            padding: 0.5rem;
+            text-align: center;
+            border-bottom: 2px solid rgba(251, 191, 36, 0.3);
+            color: #fbbf24;
+        }
+        
+        .state-table td {
+            padding: 0.5rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .state-table tr.current {
+            background: rgba(251, 191, 36, 0.15);
+        }
+        
+        .ns-lights, .ew-lights {
+            display: flex;
+            gap: 4px;
+            justify-content: center;
+        }
+        
+        .mini-light {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 1px solid #333;
+        }
+        
+        .mini-light.r { background: #3a1a1a; }
+        .mini-light.y { background: #3a3a1a; }
+        .mini-light.g { background: #1a3a1a; }
+        .mini-light.r.on { background: #ef4444; }
+        .mini-light.y.on { background: #fbbf24; }
+        .mini-light.g.on { background: #22c55e; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚦 Traffic Light Controller</h1>
+            <p class="subtitle">Moore Machine with timed transitions — 4-way intersection</p>
+        </header>
+        
+        <div class="main-layout">
+            <div class="panel">
+                <!-- Traffic Lights Visual -->
+                <h2 class="panel-title">Intersection View</h2>
+                <div class="traffic-light-container">
+                    <div class="light-assembly">
+                        <div class="light-label">North-South</div>
+                        <div class="traffic-light" id="ns-light">
+                            <div class="light red on" id="ns-red"></div>
+                            <div class="light yellow" id="ns-yellow"></div>
+                            <div class="light green" id="ns-green"></div>
+                        </div>
+                    </div>
+                    <div class="light-assembly">
+                        <div class="light-label">East-West</div>
+                        <div class="traffic-light" id="ew-light">
+                            <div class="light red" id="ew-red"></div>
+                            <div class="light yellow" id="ew-yellow"></div>
+                            <div class="light green on" id="ew-green"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- State Diagram -->
+                <h2 class="panel-title">State Diagram</h2>
+                <div class="diagram-container">
+                    <svg class="diagram-svg" viewBox="0 0 500 250">
+                        <defs>
+                            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                <polygon points="0 0, 10 3.5, 0 7" fill="#555"/>
+                            </marker>
+                            <marker id="arrowhead-active" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                <polygon points="0 0, 10 3.5, 0 7" fill="#fbbf24"/>
+                            </marker>
+                        </defs>
+                        
+                        <!-- States in a cycle -->
+                        <!-- S0: NS=Red, EW=Green -->
+                        <circle id="state-s0" class="state-circle green-state active" cx="100" cy="80" r="45"/>
+                        <text class="state-label" x="100" y="75">S0</text>
+                        <text class="state-label" x="100" y="92" font-size="9" fill="#888">NS:R EW:G</text>
+                        
+                        <!-- S1: NS=Red, EW=Yellow -->
+                        <circle id="state-s1" class="state-circle yellow-state" cx="400" cy="80" r="45"/>
+                        <text class="state-label" x="400" y="75">S1</text>
+                        <text class="state-label" x="400" y="92" font-size="9" fill="#888">NS:R EW:Y</text>
+                        
+                        <!-- S2: NS=Green, EW=Red -->
+                        <circle id="state-s2" class="state-circle green-state" cx="400" cy="190" r="45"/>
+                        <text class="state-label" x="400" y="185">S2</text>
+                        <text class="state-label" x="400" y="202" font-size="9" fill="#888">NS:G EW:R</text>
+                        
+                        <!-- S3: NS=Yellow, EW=Red -->
+                        <circle id="state-s3" class="state-circle yellow-state" cx="100" cy="190" r="45"/>
+                        <text class="state-label" x="100" y="185">S3</text>
+                        <text class="state-label" x="100" y="202" font-size="9" fill="#888">NS:Y EW:R</text>
+                        
+                        <!-- Transitions -->
+                        <!-- S0 -> S1: timeout(30s) -->
+                        <path id="trans-s0-s1" class="transition-path" d="M 145 70 L 350 70" marker-end="url(#arrowhead)"/>
+                        <text id="label-s0-s1" class="transition-label" x="250" y="60">timeout(30s)</text>
+                        
+                        <!-- S1 -> S2: timeout(5s) -->
+                        <path id="trans-s1-s2" class="transition-path" d="M 410 125 L 410 140" marker-end="url(#arrowhead)"/>
+                        <text id="label-s1-s2" class="transition-label" x="450" y="135">timeout(5s)</text>
+                        
+                        <!-- S2 -> S3: timeout(30s) -->
+                        <path id="trans-s2-s3" class="transition-path" d="M 355 200 L 150 200" marker-end="url(#arrowhead)"/>
+                        <text id="label-s2-s3" class="transition-label" x="250" y="220">timeout(30s)</text>
+                        
+                        <!-- S3 -> S0: timeout(5s) -->
+                        <path id="trans-s3-s0" class="transition-path" d="M 90 145 L 90 130" marker-end="url(#arrowhead)"/>
+                        <text id="label-s3-s0" class="transition-label" x="40" y="135">timeout(5s)</text>
+                        
+                        <!-- Start arrow -->
+                        <path d="M 20 80 L 50 80" stroke="#888" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    </svg>
+                </div>
+                
+                <div class="info-box">
+                    <div class="info-title">Moore Machine with Timer Input</div>
+                    <div class="info-text">
+                        This FSM uses <strong>timeout events</strong> as inputs. Each state has a fixed duration:
+                        <strong>Green = 30s</strong>, <strong>Yellow = 5s</strong>. 
+                        The output (light colors) depends only on the current state.
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Control Panel -->
+            <div class="panel">
+                <h2 class="panel-title">Simulation</h2>
+                
+                <div class="timer-display">
+                    <div class="timer-value" id="timer-value">30</div>
+                    <div class="timer-label">Seconds until transition</div>
+                </div>
+                
+                <div class="control-buttons">
+                    <button class="control-btn play" id="play-btn" onclick="toggleSimulation()">
+                        ▶ Start Simulation
+                    </button>
+                    <button class="control-btn step" onclick="stepForward()">
+                        ⏭ Step to Next State
+                    </button>
+                </div>
+                
+                <div class="speed-control">
+                    <div class="speed-label">Simulation Speed: <span id="speed-display">1x</span></div>
+                    <input type="range" class="speed-slider" id="speed-slider" min="1" max="10" value="1" onchange="updateSpeed()">
+                </div>
+                
+                <div class="info-box">
+                    <div class="info-title">Current State</div>
+                    <div class="info-text" id="state-description">
+                        <strong>S0</strong> — East-West has GREEN. North-South is RED.
+                    </div>
+                </div>
+                
+                <h3 class="panel-title" style="margin-top: 1rem;">State/Output Table</h3>
+                <table class="state-table">
+                    <thead>
+                        <tr>
+                            <th>State</th>
+                            <th>N-S</th>
+                            <th>E-W</th>
+                            <th>Duration</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="row-s0" class="current">
+                            <td>S0</td>
+                            <td>
+                                <div class="ns-lights">
+                                    <div class="mini-light r on"></div>
+                                    <div class="mini-light y"></div>
+                                    <div class="mini-light g"></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="ew-lights">
+                                    <div class="mini-light r"></div>
+                                    <div class="mini-light y"></div>
+                                    <div class="mini-light g on"></div>
+                                </div>
+                            </td>
+                            <td>30s</td>
+                        </tr>
+                        <tr id="row-s1">
+                            <td>S1</td>
+                            <td>
+                                <div class="ns-lights">
+                                    <div class="mini-light r on"></div>
+                                    <div class="mini-light y"></div>
+                                    <div class="mini-light g"></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="ew-lights">
+                                    <div class="mini-light r"></div>
+                                    <div class="mini-light y on"></div>
+                                    <div class="mini-light g"></div>
+                                </div>
+                            </td>
+                            <td>5s</td>
+                        </tr>
+                        <tr id="row-s2">
+                            <td>S2</td>
+                            <td>
+                                <div class="ns-lights">
+                                    <div class="mini-light r"></div>
+                                    <div class="mini-light y"></div>
+                                    <div class="mini-light g on"></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="ew-lights">
+                                    <div class="mini-light r on"></div>
+                                    <div class="mini-light y"></div>
+                                    <div class="mini-light g"></div>
+                                </div>
+                            </td>
+                            <td>30s</td>
+                        </tr>
+                        <tr id="row-s3">
+                            <td>S3</td>
+                            <td>
+                                <div class="ns-lights">
+                                    <div class="mini-light r"></div>
+                                    <div class="mini-light y on"></div>
+                                    <div class="mini-light g"></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="ew-lights">
+                                    <div class="mini-light r on"></div>
+                                    <div class="mini-light y"></div>
+                                    <div class="mini-light g"></div>
+                                </div>
+                            </td>
+                            <td>5s</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // States with outputs and durations
+        const STATES = {
+            S0: { 
+                ns: { r: true, y: false, g: false },
+                ew: { r: false, y: false, g: true },
+                duration: 30,
+                desc: 'East-West has GREEN. North-South is RED.',
+                next: 'S1'
+            },
+            S1: { 
+                ns: { r: true, y: false, g: false },
+                ew: { r: false, y: true, g: false },
+                duration: 5,
+                desc: 'East-West YELLOW (warning). North-South still RED.',
+                next: 'S2'
+            },
+            S2: { 
+                ns: { r: false, y: false, g: true },
+                ew: { r: true, y: false, g: false },
+                duration: 30,
+                desc: 'North-South has GREEN. East-West is RED.',
+                next: 'S3'
+            },
+            S3: { 
+                ns: { r: false, y: true, g: false },
+                ew: { r: true, y: false, g: false },
+                duration: 5,
+                desc: 'North-South YELLOW (warning). East-West still RED.',
+                next: 'S0'
+            }
+        };
+        
+        let currentState = 'S0';
+        let timer = STATES.S0.duration;
+        let isRunning = false;
+        let intervalId = null;
+        let speed = 1;
+        
+        function updateLights() {
+            const state = STATES[currentState];
+            
+            // Update NS lights
+            document.getElementById('ns-red').classList.toggle('on', state.ns.r);
+            document.getElementById('ns-yellow').classList.toggle('on', state.ns.y);
+            document.getElementById('ns-green').classList.toggle('on', state.ns.g);
+            
+            // Update EW lights
+            document.getElementById('ew-red').classList.toggle('on', state.ew.r);
+            document.getElementById('ew-yellow').classList.toggle('on', state.ew.y);
+            document.getElementById('ew-green').classList.toggle('on', state.ew.g);
+        }
+        
+        function updateDiagram() {
+            // Clear all active states
+            document.querySelectorAll('.state-circle').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.transition-path').forEach(el => {
+                el.classList.remove('active');
+                el.setAttribute('marker-end', 'url(#arrowhead)');
+            });
+            
+            // Highlight current state
+            document.getElementById(`state-${currentState.toLowerCase()}`).classList.add('active');
+            
+            // Update table
+            document.querySelectorAll('.state-table tbody tr').forEach(row => {
+                row.classList.remove('current');
+            });
+            document.getElementById(`row-${currentState.toLowerCase()}`).classList.add('current');
+            
+            // Update description
+            document.getElementById('state-description').innerHTML = 
+                `<strong>${currentState}</strong> — ${STATES[currentState].desc}`;
+        }
+        
+        function updateTimer() {
+            document.getElementById('timer-value').textContent = timer;
+        }
+        
+        function animateTransition(from, to) {
+            const transId = `trans-${from.toLowerCase()}-${to.toLowerCase()}`;
+            const path = document.getElementById(transId);
+            if (path) {
+                path.classList.add('active');
+                path.setAttribute('marker-end', 'url(#arrowhead-active)');
+                
+                setTimeout(() => {
+                    path.classList.remove('active');
+                    path.setAttribute('marker-end', 'url(#arrowhead)');
+                }, 500);
+            }
+        }
+        
+        function tick() {
+            timer--;
+            updateTimer();
+            
+            if (timer <= 0) {
+                const prevState = currentState;
+                currentState = STATES[currentState].next;
+                timer = STATES[currentState].duration;
+                
+                animateTransition(prevState, currentState);
+                updateLights();
+                updateDiagram();
+                updateTimer();
+            }
+        }
+        
+        function toggleSimulation() {
+            const btn = document.getElementById('play-btn');
+            
+            if (isRunning) {
+                clearInterval(intervalId);
+                isRunning = false;
+                btn.textContent = '▶ Start Simulation';
+                btn.classList.remove('pause');
+                btn.classList.add('play');
+            } else {
+                intervalId = setInterval(tick, 1000 / speed);
+                isRunning = true;
+                btn.textContent = '⏸ Pause Simulation';
+                btn.classList.remove('play');
+                btn.classList.add('pause');
+            }
+        }
+        
+        function stepForward() {
+            const prevState = currentState;
+            currentState = STATES[currentState].next;
+            timer = STATES[currentState].duration;
+            
+            animateTransition(prevState, currentState);
+            updateLights();
+            updateDiagram();
+            updateTimer();
+        }
+        
+        function updateSpeed() {
+            speed = parseInt(document.getElementById('speed-slider').value);
+            document.getElementById('speed-display').textContent = speed + 'x';
+            
+            if (isRunning) {
+                clearInterval(intervalId);
+                intervalId = setInterval(tick, 1000 / speed);
+            }
+        }
+        
+        // Initialize
+        updateLights();
+        updateDiagram();
+        updateTimer();
+    </script>
+</body>
+</html>

@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FSM: Combination Lock</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #f9d423 0%, #ff4e50 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            font-size: 1rem;
+            color: #888;
+        }
+        
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 2rem;
+        }
+        
+        @media (max-width: 900px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .panel {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+        
+        .panel-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #f9d423;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        
+        /* State Diagram */
+        .diagram-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+        }
+        
+        .diagram-svg {
+            width: 100%;
+            max-width: 600px;
+            height: 420px;
+        }
+        
+        .state-circle {
+            fill: #1a1a2e;
+            stroke: #444;
+            stroke-width: 3;
+            transition: all 0.3s ease;
+        }
+        
+        .state-circle.active {
+            fill: #2a2a4e;
+            stroke: #f9d423;
+            filter: drop-shadow(0 0 10px rgba(249, 212, 35, 0.5));
+        }
+        
+        .state-circle.accept {
+            stroke: #4ade80;
+        }
+        
+        .state-circle.active.accept {
+            stroke: #4ade80;
+            filter: drop-shadow(0 0 15px rgba(74, 222, 128, 0.7));
+        }
+        
+        .state-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            font-weight: 600;
+            fill: #fff;
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+        
+        .state-output {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            fill: #888;
+            text-anchor: middle;
+        }
+        
+        .transition-path {
+            fill: none;
+            stroke: #555;
+            stroke-width: 2;
+            marker-end: url(#arrowhead);
+        }
+        
+        .transition-path.active {
+            stroke: #f9d423;
+            stroke-width: 3;
+            filter: drop-shadow(0 0 4px rgba(249, 212, 35, 0.5));
+        }
+        
+        .transition-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            fill: #aaa;
+        }
+        
+        .transition-label.active {
+            fill: #f9d423;
+            font-weight: 600;
+        }
+        
+        .self-loop {
+            fill: none;
+            stroke: #555;
+            stroke-width: 2;
+            marker-end: url(#arrowhead);
+        }
+        
+        /* Input Panel */
+        .lock-display {
+            background: #000;
+            border: 3px solid #333;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .lock-digits {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #4ade80;
+            letter-spacing: 0.5rem;
+            text-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+        }
+        
+        .lock-status {
+            margin-top: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .lock-status.locked {
+            color: #ef4444;
+        }
+        
+        .lock-status.unlocked {
+            color: #4ade80;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .key-btn {
+            padding: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+            border: 2px solid #444;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        
+        .key-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #666;
+        }
+        
+        .key-btn:active {
+            transform: scale(0.95);
+            background: rgba(249, 212, 35, 0.2);
+            border-color: #f9d423;
+        }
+        
+        .key-btn.correct {
+            background: rgba(74, 222, 128, 0.2);
+            border-color: #4ade80;
+        }
+        
+        .key-btn.wrong {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #ef4444;
+        }
+        
+        .reset-btn {
+            width: 100%;
+            padding: 0.75rem;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            border: 2px solid #ef4444;
+            border-radius: 8px;
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .reset-btn:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+        
+        /* Info Boxes */
+        .info-section {
+            margin-top: 1.5rem;
+        }
+        
+        .info-box {
+            background: rgba(249, 212, 35, 0.1);
+            border: 1px solid rgba(249, 212, 35, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .info-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #f9d423;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        
+        .info-text {
+            font-size: 0.9rem;
+            color: #ccc;
+            line-height: 1.5;
+        }
+        
+        .state-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            margin-top: 1rem;
+        }
+        
+        .state-table th {
+            background: rgba(249, 212, 35, 0.2);
+            padding: 0.5rem;
+            text-align: left;
+            border-bottom: 2px solid rgba(249, 212, 35, 0.3);
+            color: #f9d423;
+        }
+        
+        .state-table td {
+            padding: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .state-table tr.current {
+            background: rgba(249, 212, 35, 0.1);
+        }
+        
+        .history-log {
+            max-height: 150px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-top: 1rem;
+        }
+        
+        .history-item {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            padding: 0.3rem 0.5rem;
+            margin-bottom: 0.25rem;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .history-item.success {
+            background: rgba(74, 222, 128, 0.2);
+            color: #4ade80;
+        }
+        
+        .history-item.reset {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+        
+        /* Double circle for accept state */
+        .accept-outer {
+            fill: none;
+            stroke: #4ade80;
+            stroke-width: 2;
+        }
+        
+        /* Secret code display */
+        .secret-code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 0.5rem;
+        }
+        
+        .secret-code span {
+            color: #f9d423;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔐 Combination Lock FSM</h1>
+            <p class="subtitle">A Moore Machine — output depends only on current state</p>
+        </header>
+        
+        <div class="main-layout">
+            <!-- State Diagram -->
+            <div class="panel">
+                <h2 class="panel-title">State Diagram</h2>
+                <div class="diagram-container">
+                    <svg class="diagram-svg" viewBox="0 0 550 400">
+                        <defs>
+                            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                <polygon points="0 0, 10 3.5, 0 7" fill="#555"/>
+                            </marker>
+                            <marker id="arrowhead-active" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                <polygon points="0 0, 10 3.5, 0 7" fill="#f9d423"/>
+                            </marker>
+                        </defs>
+                        
+                        <!-- States positioned in a flow -->
+                        <!-- S0: Initial state -->
+                        <circle id="state-s0" class="state-circle active" cx="80" cy="200" r="40"/>
+                        <text class="state-label" x="80" y="195">S0</text>
+                        <text class="state-output" x="80" y="215">LOCKED</text>
+                        <!-- Start arrow -->
+                        <path d="M 10 200 L 35 200" stroke="#888" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        
+                        <!-- S1: Got first digit -->
+                        <circle id="state-s1" class="state-circle" cx="200" cy="200" r="40"/>
+                        <text class="state-label" x="200" y="195">S1</text>
+                        <text class="state-output" x="200" y="215">LOCKED</text>
+                        
+                        <!-- S2: Got second digit -->
+                        <circle id="state-s2" class="state-circle" cx="320" cy="200" r="40"/>
+                        <text class="state-label" x="320" y="195">S2</text>
+                        <text class="state-output" x="320" y="215">LOCKED</text>
+                        
+                        <!-- S3: UNLOCKED (accept state) -->
+                        <circle id="state-s3-outer" class="accept-outer" cx="450" cy="200" r="45"/>
+                        <circle id="state-s3" class="state-circle accept" cx="450" cy="200" r="38"/>
+                        <text class="state-label" x="450" y="195">S3</text>
+                        <text class="state-output" x="450" y="215" fill="#4ade80">UNLOCKED</text>
+                        
+                        <!-- Transitions -->
+                        <!-- S0 -> S1 on '1' -->
+                        <path id="trans-s0-s1" class="transition-path" d="M 120 190 L 155 190"/>
+                        <text id="label-s0-s1" class="transition-label" x="137" y="180">1</text>
+                        
+                        <!-- S1 -> S2 on '2' -->
+                        <path id="trans-s1-s2" class="transition-path" d="M 240 190 L 275 190"/>
+                        <text id="label-s1-s2" class="transition-label" x="257" y="180">2</text>
+                        
+                        <!-- S2 -> S3 on '3' -->
+                        <path id="trans-s2-s3" class="transition-path" d="M 360 190 L 405 190"/>
+                        <text id="label-s2-s3" class="transition-label" x="382" y="180">3</text>
+                        
+                        <!-- S0 self-loop on wrong input -->
+                        <path id="trans-s0-s0" class="self-loop" d="M 60 162 Q 80 100 100 162"/>
+                        <text id="label-s0-s0" class="transition-label" x="80" y="115">other</text>
+                        
+                        <!-- S1 -> S0 on wrong input (except '1' which means restart) -->
+                        <path id="trans-s1-s0" class="transition-path" d="M 175 235 Q 140 280 95 235"/>
+                        <text id="label-s1-s0" class="transition-label" x="120" y="285">other</text>
+                        
+                        <!-- S1 -> S1 on '1' (restart sequence) -->
+                        <path id="trans-s1-s1" class="self-loop" d="M 180 162 Q 200 100 220 162"/>
+                        <text id="label-s1-s1" class="transition-label" x="200" y="115">1</text>
+                        
+                        <!-- S2 -> S0 on wrong input -->
+                        <path id="trans-s2-s0" class="transition-path" d="M 295 235 Q 200 320 95 235"/>
+                        <text id="label-s2-s0" class="transition-label" x="180" y="340">other</text>
+                        
+                        <!-- S2 -> S1 on '1' -->
+                        <path id="trans-s2-s1" class="transition-path" d="M 295 165 Q 260 120 225 165"/>
+                        <text id="label-s2-s1" class="transition-label" x="260" y="115">1</text>
+                        
+                        <!-- S3 -> S0 on any input (lock again) -->
+                        <path id="trans-s3-s0" class="transition-path" d="M 420 235 Q 270 380 95 235"/>
+                        <text id="label-s3-s0" class="transition-label" x="260" y="380">any</text>
+                        
+                        <!-- Current state indicator arrow -->
+                        <polygon id="state-pointer" points="0,-8 15,0 0,8" fill="#f9d423" transform="translate(25, 200)"/>
+                    </svg>
+                </div>
+                
+                <div class="info-box">
+                    <div class="info-title">FSM Type: Moore Machine</div>
+                    <div class="info-text">
+                        In a <strong>Moore machine</strong>, the output depends <em>only</em> on the current state, 
+                        not on the input. Notice how each state has a fixed output label (LOCKED or UNLOCKED).
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Control Panel -->
+            <div class="panel">
+                <h2 class="panel-title">Input</h2>
+                
+                <div class="lock-display">
+                    <div class="lock-digits" id="entered-digits">_ _ _</div>
+                    <div class="lock-status locked" id="lock-status">🔒 LOCKED</div>
+                    <div class="secret-code">Secret code: <span>1-2-3</span></div>
+                </div>
+                
+                <div class="keypad">
+                    <button class="key-btn" onclick="pressKey(1)">1</button>
+                    <button class="key-btn" onclick="pressKey(2)">2</button>
+                    <button class="key-btn" onclick="pressKey(3)">3</button>
+                    <button class="key-btn" onclick="pressKey(4)">4</button>
+                    <button class="key-btn" onclick="pressKey(5)">5</button>
+                    <button class="key-btn" onclick="pressKey(6)">6</button>
+                    <button class="key-btn" onclick="pressKey(7)">7</button>
+                    <button class="key-btn" onclick="pressKey(8)">8</button>
+                    <button class="key-btn" onclick="pressKey(9)">9</button>
+                </div>
+                
+                <button class="reset-btn" onclick="resetLock()">🔄 Reset Lock</button>
+                
+                <div class="info-section">
+                    <div class="info-box">
+                        <div class="info-title">Current State</div>
+                        <div class="info-text" id="state-description">
+                            <strong>S0</strong> — Waiting for first digit. Enter '1' to begin.
+                        </div>
+                    </div>
+                    
+                    <table class="state-table">
+                        <thead>
+                            <tr>
+                                <th>State</th>
+                                <th>Meaning</th>
+                                <th>Output</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr id="row-s0" class="current">
+                                <td>S0</td>
+                                <td>Initial / 0 correct</td>
+                                <td>LOCKED</td>
+                            </tr>
+                            <tr id="row-s1">
+                                <td>S1</td>
+                                <td>Got '1'</td>
+                                <td>LOCKED</td>
+                            </tr>
+                            <tr id="row-s2">
+                                <td>S2</td>
+                                <td>Got '1-2'</td>
+                                <td>LOCKED</td>
+                            </tr>
+                            <tr id="row-s3">
+                                <td>S3</td>
+                                <td>Got '1-2-3' ✓</td>
+                                <td>UNLOCKED</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <h3 class="panel-title" style="margin-top: 1rem;">Transition Log</h3>
+                    <div class="history-log" id="history-log">
+                        <div class="history-item">System ready. Enter code: 1-2-3</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // FSM State
+        const STATES = {
+            S0: { name: 'S0', output: 'LOCKED', desc: 'Waiting for first digit. Enter \'1\' to begin.' },
+            S1: { name: 'S1', output: 'LOCKED', desc: 'Got \'1\'. Now enter \'2\'.' },
+            S2: { name: 'S2', output: 'LOCKED', desc: 'Got \'1-2\'. Now enter \'3\' to unlock!' },
+            S3: { name: 'S3', output: 'UNLOCKED', desc: '🎉 UNLOCKED! Press any key to lock again.' }
+        };
+        
+        // Transition function: (currentState, input) -> nextState
+        const transitions = {
+            S0: { 1: 'S1', default: 'S0' },
+            S1: { 1: 'S1', 2: 'S2', default: 'S0' },
+            S2: { 1: 'S1', 3: 'S3', default: 'S0' },
+            S3: { default: 'S0' }  // Any input locks it again
+        };
+        
+        let currentState = 'S0';
+        let enteredDigits = [];
+        
+        function pressKey(digit) {
+            const prevState = currentState;
+            
+            // Get next state from transition function
+            const stateTransitions = transitions[currentState];
+            const nextState = stateTransitions[digit] || stateTransitions.default;
+            
+            // Track entered digits for display
+            if (nextState === 'S0' && currentState !== 'S3') {
+                // Wrong input - reset display
+                enteredDigits = [];
+                if (digit === 1) {
+                    enteredDigits = [1];
+                    // Actually go to S1 if pressed 1
+                }
+            } else if (nextState === 'S1' && currentState !== 'S0') {
+                // Restarted with '1'
+                enteredDigits = [1];
+            } else if (currentState === 'S3') {
+                // Was unlocked, now locking
+                enteredDigits = [];
+            } else {
+                enteredDigits.push(digit);
+            }
+            
+            // Log the transition
+            logTransition(prevState, digit, nextState);
+            
+            // Highlight the key briefly
+            highlightKey(digit, prevState, nextState);
+            
+            // Animate transition
+            animateTransition(prevState, nextState, digit);
+            
+            // Update state
+            currentState = nextState;
+            updateDisplay();
+        }
+        
+        function highlightKey(digit, prevState, nextState) {
+            const buttons = document.querySelectorAll('.key-btn');
+            const btn = buttons[digit - 1];
+            
+            const isCorrect = (prevState === 'S0' && digit === 1) ||
+                              (prevState === 'S1' && digit === 2) ||
+                              (prevState === 'S2' && digit === 3);
+            
+            btn.classList.add(isCorrect ? 'correct' : 'wrong');
+            setTimeout(() => {
+                btn.classList.remove('correct', 'wrong');
+            }, 300);
+        }
+        
+        function animateTransition(from, to, input) {
+            // Clear previous active states
+            document.querySelectorAll('.state-circle').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.transition-path, .self-loop').forEach(el => {
+                el.classList.remove('active');
+                el.style.markerEnd = 'url(#arrowhead)';
+            });
+            document.querySelectorAll('.transition-label').forEach(el => el.classList.remove('active'));
+            
+            // Determine which transition path to highlight
+            let transId = null;
+            if (from === 'S0' && to === 'S1') transId = 'trans-s0-s1';
+            else if (from === 'S0' && to === 'S0') transId = 'trans-s0-s0';
+            else if (from === 'S1' && to === 'S2') transId = 'trans-s1-s2';
+            else if (from === 'S1' && to === 'S0') transId = 'trans-s1-s0';
+            else if (from === 'S1' && to === 'S1') transId = 'trans-s1-s1';
+            else if (from === 'S2' && to === 'S3') transId = 'trans-s2-s3';
+            else if (from === 'S2' && to === 'S0') transId = 'trans-s2-s0';
+            else if (from === 'S2' && to === 'S1') transId = 'trans-s2-s1';
+            else if (from === 'S3' && to === 'S0') transId = 'trans-s3-s0';
+            
+            if (transId) {
+                const path = document.getElementById(transId);
+                const label = document.getElementById(transId.replace('trans', 'label'));
+                if (path) {
+                    path.classList.add('active');
+                    path.style.markerEnd = 'url(#arrowhead-active)';
+                }
+                if (label) label.classList.add('active');
+            }
+            
+            // Highlight new state
+            const stateEl = document.getElementById(`state-${to.toLowerCase()}`);
+            if (stateEl) stateEl.classList.add('active');
+        }
+        
+        function updateDisplay() {
+            // Update digit display
+            const digitDisplay = document.getElementById('entered-digits');
+            let display = enteredDigits.map(d => d).join(' ');
+            while (display.split(' ').length < 3) {
+                display += display.length > 0 ? ' _' : '_';
+            }
+            digitDisplay.textContent = display.split('').join(' ');
+            
+            // Update lock status
+            const statusEl = document.getElementById('lock-status');
+            const state = STATES[currentState];
+            if (state.output === 'UNLOCKED') {
+                statusEl.textContent = '🔓 UNLOCKED';
+                statusEl.className = 'lock-status unlocked';
+            } else {
+                statusEl.textContent = '🔒 LOCKED';
+                statusEl.className = 'lock-status locked';
+            }
+            
+            // Update state description
+            document.getElementById('state-description').innerHTML = 
+                `<strong>${currentState}</strong> — ${state.desc}`;
+            
+            // Update table highlighting
+            document.querySelectorAll('.state-table tbody tr').forEach(row => {
+                row.classList.remove('current');
+            });
+            document.getElementById(`row-${currentState.toLowerCase()}`).classList.add('current');
+        }
+        
+        function logTransition(from, input, to) {
+            const log = document.getElementById('history-log');
+            const item = document.createElement('div');
+            item.className = 'history-item';
+            
+            if (to === 'S3') {
+                item.classList.add('success');
+                item.textContent = `${from} --[${input}]--> ${to} ✓ UNLOCKED!`;
+            } else if (to === 'S0' && from !== 'S0' && from !== 'S3') {
+                item.classList.add('reset');
+                item.textContent = `${from} --[${input}]--> ${to} ✗ Wrong! Reset.`;
+            } else {
+                item.textContent = `${from} --[${input}]--> ${to}`;
+            }
+            
+            log.insertBefore(item, log.firstChild);
+            
+            // Keep only last 20 items
+            while (log.children.length > 20) {
+                log.removeChild(log.lastChild);
+            }
+        }
+        
+        function resetLock() {
+            currentState = 'S0';
+            enteredDigits = [];
+            
+            // Clear active transitions
+            document.querySelectorAll('.transition-path, .self-loop').forEach(el => {
+                el.classList.remove('active');
+                el.style.markerEnd = 'url(#arrowhead)';
+            });
+            document.querySelectorAll('.transition-label').forEach(el => el.classList.remove('active'));
+            
+            // Reset state highlighting
+            document.querySelectorAll('.state-circle').forEach(el => el.classList.remove('active'));
+            document.getElementById('state-s0').classList.add('active');
+            
+            updateDisplay();
+            
+            const log = document.getElementById('history-log');
+            const item = document.createElement('div');
+            item.className = 'history-item reset';
+            item.textContent = '🔄 Lock reset to S0';
+            log.insertBefore(item, log.firstChild);
+        }
+        
+        // Initialize
+        updateDisplay();
+    </script>
+</body>
+</html>
