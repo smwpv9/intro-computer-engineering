@@ -37,6 +37,13 @@
             <span class="arrow">→</span>
           </button>
         </a>
+
+        <a class="button-wrapper" href="./fsm-vending-machine.html">
+          <button>
+            <span class="button-text">🥤 Vending Machine FSM</span>
+            <span class="arrow">→</span>
+          </button>
+        </a>
         </nav>
     </main>
   </body>

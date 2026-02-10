@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FSM: Vending Machine</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: linear-gradient(135deg, #1e3a5f 0%, #0d1b2a 50%, #1e3a5f 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            font-size: 1rem;
+            color: #888;
+        }
+        
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 2rem;
+        }
+        
+        @media (max-width: 950px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .panel {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+        
+        .panel-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #10b981;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        
+        /* State Diagram */
+        .diagram-svg {
+            width: 100%;
+            max-width: 600px;
+            height: 320px;
+            display: block;
+            margin: 0 auto;
+        }
+        
+        .state-circle {
+            fill: #0d1b2a;
+            stroke: #3b82f6;
+            stroke-width: 3;
+            transition: all 0.3s ease;
+        }
+        
+        .state-circle.active {
+            fill: #1e3a5f;
+            stroke: #10b981;
+            filter: drop-shadow(0 0 12px rgba(16, 185, 129, 0.6));
+        }
+        
+        .state-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            font-weight: 600;
+            fill: #fff;
+            text-anchor: middle;
+        }
+        
+        .state-amount {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            fill: #10b981;
+            text-anchor: middle;
+        }
+        
+        .transition-path {
+            fill: none;
+            stroke: #3b82f6;
+            stroke-width: 2;
+            opacity: 0.6;
+        }
+        
+        .transition-path.active {
+            stroke: #10b981;
+            stroke-width: 3;
+            opacity: 1;
+            filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.5));
+        }
+        
+        .transition-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            fill: #888;
+        }
+        
+        .transition-label.active {
+            fill: #10b981;
+            font-weight: 700;
+        }
+        
+        /* Vending Machine Visual */
+        .vending-machine {
+            background: linear-gradient(180deg, #2d2d2d 0%, #1a1a1a 100%);
+            border: 4px solid #444;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .display-screen {
+            background: #001a00;
+            border: 3px solid #333;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .display-amount {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #10b981;
+            text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }
+        
+        .display-message {
+            font-size: 0.9rem;
+            color: #10b981;
+            margin-top: 0.5rem;
+            min-height: 1.5em;
+        }
+        
+        .product-display {
+            background: #000;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        
+        .product-icon {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .product-name {
+            font-size: 0.9rem;
+            color: #888;
+        }
+        
+        .product-price {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #3b82f6;
+        }
+        
+        /* Coin Slot */
+        .coin-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .coin-label {
+            font-size: 0.75rem;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+        
+        .coin-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
+        
+        .coin-btn {
+            padding: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            font-weight: 700;
+            border: 2px solid #3b82f6;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #2a4a6d, #1a3a5f);
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            aspect-ratio: 1;
+        }
+        
+        .coin-btn:hover {
+            background: linear-gradient(145deg, #3b5a7d, #2a4a6d);
+            transform: scale(1.05);
+        }
+        
+        .coin-btn:active {
+            transform: scale(0.95);
+            background: rgba(16, 185, 129, 0.3);
+            border-color: #10b981;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+        }
+        
+        .action-btn {
+            flex: 1;
+            padding: 0.75rem;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: 2px solid #444;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .action-btn.dispense {
+            border-color: #10b981;
+            color: #10b981;
+        }
+        
+        .action-btn.dispense:hover:not(:disabled) {
+            background: rgba(16, 185, 129, 0.2);
+        }
+        
+        .action-btn.dispense:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        
+        .action-btn.refund {
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+        
+        .action-btn.refund:hover:not(:disabled) {
+            background: rgba(239, 68, 68, 0.2);
+        }
+        
+        .action-btn.refund:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        
+        /* Info */
+        .info-box {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .info-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #10b981;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        
+        .info-text {
+            font-size: 0.85rem;
+            color: #ccc;
+            line-height: 1.5;
+        }
+        
+        /* Change Output */
+        .change-display {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-top: 1rem;
+            text-align: center;
+        }
+        
+        .change-label {
+            font-size: 0.75rem;
+            color: #666;
+            text-transform: uppercase;
+        }
+        
+        .change-coins {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.5rem;
+            color: #fbbf24;
+            min-height: 2rem;
+        }
+        
+        /* Animation for dispensing */
+        @keyframes dispense {
+            0% { transform: translateY(-20px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        
+        .dispensed {
+            animation: dispense 0.5s ease;
+        }
+        
+        /* State table */
+        .state-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            margin-top: 1rem;
+        }
+        
+        .state-table th {
+            background: rgba(16, 185, 129, 0.2);
+            padding: 0.4rem;
+            text-align: center;
+            border-bottom: 2px solid rgba(16, 185, 129, 0.3);
+            color: #10b981;
+        }
+        
+        .state-table td {
+            padding: 0.4rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .state-table tr.current {
+            background: rgba(16, 185, 129, 0.15);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🥤 Vending Machine FSM</h1>
+            <p class="subtitle">Moore Machine — Accepts coins until price met, then dispenses</p>
+        </header>
+        
+        <div class="main-layout">
+            <!-- State Diagram -->
+            <div class="panel">
+                <h2 class="panel-title">State Diagram (Price: 15¢)</h2>
+                <svg class="diagram-svg" viewBox="0 0 550 300">
+                    <defs>
+                        <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+                            <polygon points="0 0, 8 3, 0 6" fill="#3b82f6" opacity="0.6"/>
+                        </marker>
+                        <marker id="arrowhead-active" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+                            <polygon points="0 0, 8 3, 0 6" fill="#10b981"/>
+                        </marker>
+                    </defs>
+                    
+                    <!-- States -->
+                    <!-- S0: 0¢ -->
+                    <circle id="state-s0" class="state-circle active" cx="80" cy="150" r="35"/>
+                    <text class="state-label" x="80" y="145">S0</text>
+                    <text class="state-amount" x="80" y="162">0¢</text>
+                    <path d="M 15 150 L 40 150" stroke="#888" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    
+                    <!-- S5: 5¢ -->
+                    <circle id="state-s5" class="state-circle" cx="200" cy="80" r="35"/>
+                    <text class="state-label" x="200" y="75">S5</text>
+                    <text class="state-amount" x="200" y="92">5¢</text>
+                    
+                    <!-- S10: 10¢ -->
+                    <circle id="state-s10" class="state-circle" cx="200" cy="220" r="35"/>
+                    <text class="state-label" x="200" y="215">S10</text>
+                    <text class="state-amount" x="200" y="232">10¢</text>
+                    
+                    <!-- S15: 15¢+ (dispense) -->
+                    <circle id="state-s15-outer" cx="380" cy="150" r="42" fill="none" stroke="#10b981" stroke-width="2"/>
+                    <circle id="state-s15" class="state-circle" cx="380" cy="150" r="35"/>
+                    <text class="state-label" x="380" y="142">S15</text>
+                    <text class="state-amount" x="380" y="158">15¢+</text>
+                    <text class="state-amount" x="380" y="172" fill="#10b981">DISPENSE</text>
+                    
+                    <!-- Transitions -->
+                    <!-- S0 --N(5¢)--> S5 -->
+                    <path id="trans-s0-s5" class="transition-path" d="M 105 125 L 170 95" marker-end="url(#arrowhead)"/>
+                    <text id="label-s0-s5" class="transition-label" x="125" y="100">N(5¢)</text>
+                    
+                    <!-- S0 --D(10¢)--> S10 -->
+                    <path id="trans-s0-s10" class="transition-path" d="M 105 175 L 170 205" marker-end="url(#arrowhead)"/>
+                    <text id="label-s0-s10" class="transition-label" x="115" y="210">D(10¢)</text>
+                    
+                    <!-- S5 --N(5¢)--> S10 -->
+                    <path id="trans-s5-s10" class="transition-path" d="M 200 115 L 200 180" marker-end="url(#arrowhead)"/>
+                    <text id="label-s5-s10" class="transition-label" x="215" y="150">N(5¢)</text>
+                    
+                    <!-- S5 --D(10¢)--> S15 -->
+                    <path id="trans-s5-s15" class="transition-path" d="M 230 95 L 345 135" marker-end="url(#arrowhead)"/>
+                    <text id="label-s5-s15" class="transition-label" x="285" y="100">D(10¢)</text>
+                    
+                    <!-- S10 --N(5¢)--> S15 -->
+                    <path id="trans-s10-s15" class="transition-path" d="M 230 205 L 345 165" marker-end="url(#arrowhead)"/>
+                    <text id="label-s10-s15" class="transition-label" x="285" y="205">N(5¢)</text>
+                    
+                    <!-- S10 --D(10¢)--> S15 (with change) -->
+                    <path id="trans-s10-s15-d" class="transition-path" d="M 220 250 Q 300 290 365 185" marker-end="url(#arrowhead)"/>
+                    <text id="label-s10-s15-d" class="transition-label" x="290" y="275">D(10¢)</text>
+                    <text class="transition-label" x="290" y="288" fill="#fbbf24">+5¢ change</text>
+                    
+                    <!-- S15 --dispense--> S0 -->
+                    <path id="trans-s15-s0" class="transition-path" d="M 350 130 Q 220 -60 100 120" marker-end="url(#arrowhead)"/>
+                    <text id="label-s15-s0" class="transition-label" x="220" y="45">dispense / reset</text>
+                    
+                    <!-- S0/S5/S10 --refund--> S0 (simplified, shown as note) -->
+                    <text x="80" y="280" font-size="10" fill="#666" font-family="Space Grotesk">* Refund returns to S0 from any state</text>
+                </svg>
+                
+                <div class="info-box">
+                    <div class="info-title">Moore Machine Outputs</div>
+                    <div class="info-text">
+                        Each state represents the <strong>accumulated amount</strong>. The machine only 
+                        dispenses when reaching S15 (15¢ or more). Overpayment returns <strong>change</strong>.
+                        <br><br>
+                        <strong>Inputs:</strong> N = Nickel (5¢), D = Dime (10¢)<!--, Q = Quarter (25¢)-->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Vending Machine -->
+            <div class="panel">
+                <h2 class="panel-title">Vending Machine</h2>
+                
+                <div class="vending-machine">
+                    <div class="product-display">
+                        <div class="product-icon">🥤</div>
+                        <div class="product-name">Refreshing Soda</div>
+                        <div class="product-price">15¢</div>
+                    </div>
+                    
+                    <div class="display-screen">
+                        <div class="display-amount" id="amount-display">$0.00</div>
+                        <div class="display-message" id="message-display">Insert coins...</div>
+                    </div>
+                    
+                    <div class="coin-section">
+                        <div class="coin-label">Insert Coin</div>
+                        <div class="coin-buttons">
+                            <button class="coin-btn" onclick="insertCoin(5)">5¢</button>
+                            <button class="coin-btn" onclick="insertCoin(10)">10¢</button>
+                            <!--<button class="coin-btn" onclick="insertCoin(25)">25¢</button>-->
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="action-btn dispense" id="dispense-btn" onclick="dispense()" disabled>
+                            🥤 Dispense
+                        </button>
+                        <button class="action-btn refund" id="refund-btn" onclick="refund()" disabled>
+                            ↩ Refund
+                        </button>
+                    </div>
+                    
+                    <div class="change-display">
+                        <div class="change-label">Change Return</div>
+                        <div class="change-coins" id="change-display">—</div>
+                    </div>
+                </div>
+                
+                <div class="info-box">
+                    <div class="info-title">Current State</div>
+                    <div class="info-text" id="state-description">
+                        <strong>S0 (0¢)</strong> — Waiting for coins. Need 15¢ total.
+                    </div>
+                </div>
+                
+                <table class="state-table">
+                    <thead>
+                        <tr>
+                            <th>State</th>
+                            <th>Amount</th>
+                            <th>+5¢</th>
+                            <th>+10¢</th>
+                            <!--<th>+25¢</th>-->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="row-s0" class="current">
+                            <td>S0</td>
+                            <td>0¢</td>
+                            <td>S5</td>
+                            <td>S10</td>
+                            <!--<td>S15</td>-->
+                        </tr>
+                        <tr id="row-s5">
+                            <td>S5</td>
+                            <td>5¢</td>
+                            <td>S10</td>
+                            <td>S15</td>
+                            <!--<td>S15</td>-->
+                        </tr>
+                        <tr id="row-s10">
+                            <td>S10</td>
+                            <td>10¢</td>
+                            <td>S15</td>
+                            <td>S15</td>
+                            <!--<td>S15</td>-->
+                        </tr>
+                        <tr id="row-s15">
+                            <td>S15</td>
+                            <td>15¢+</td>
+                            <td colspan="2">DISPENSE → S0</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const PRICE = 15;
+        
+        let currentAmount = 0;
+        let currentState = 'S0';
+        
+        function getState(amount) {
+            if (amount >= 15) return 'S15';
+            if (amount >= 10) return 'S10';
+            if (amount >= 5) return 'S5';
+            return 'S0';
+        }
+        
+        function insertCoin(value) {
+            if (currentState === 'S15') return; // Already ready to dispense
+            
+            const prevState = currentState;
+            currentAmount += value;
+            currentState = getState(currentAmount);
+            
+            animateTransition(prevState, currentState, value);
+            updateDisplay();
+        }
+        
+        function dispense() {
+            if (currentAmount < PRICE) return;
+            
+            const change = currentAmount - PRICE;
+            
+            // Show change
+            if (change > 0) {
+                document.getElementById('change-display').textContent = formatChange(change);
+                document.getElementById('change-display').classList.add('dispensed');
+            }
+            
+            // Show dispense message
+            document.getElementById('message-display').textContent = '🥤 Enjoy your drink!';
+            document.getElementById('message-display').classList.add('dispensed');
+            
+            // Animate transition back to S0
+            animateTransition('S15', 'S0', 'dispense');
+            
+            // Reset after delay
+            setTimeout(() => {
+                currentAmount = 0;
+                currentState = 'S0';
+                document.getElementById('change-display').textContent = '—';
+                document.getElementById('change-display').classList.remove('dispensed');
+                document.getElementById('message-display').classList.remove('dispensed');
+                updateDisplay();
+            }, 2000);
+        }
+        
+        function refund() {
+            if (currentAmount === 0) return;
+            
+            const refundAmount = currentAmount;
+            document.getElementById('change-display').textContent = formatChange(refundAmount);
+            document.getElementById('change-display').classList.add('dispensed');
+            document.getElementById('message-display').textContent = 'Refunded!';
+            
+            setTimeout(() => {
+                animateTransition(currentState, 'S0', 'reset');
+                currentAmount = 0;
+                currentState = 'S0';
+                document.getElementById('change-display').textContent = '—';
+                document.getElementById('change-display').classList.remove('dispensed');
+                updateDisplay();
+            }, 1500);
+        }
+        
+        function formatChange(cents) {
+            const quarters = Math.floor(cents / 25);
+            cents %= 25;
+            const dimes = Math.floor(cents / 10);
+            cents %= 10;
+            const nickels = Math.floor(cents / 5);
+            
+            let parts = [];
+            if (quarters) parts.push(`${quarters}×25¢`);
+            if (dimes) parts.push(`${dimes}×10¢`);
+            if (nickels) parts.push(`${nickels}×5¢`);
+            
+            return parts.join(' + ') || '—';
+        }
+        
+        function animateTransition(from, to, input) {
+            // Clear previous highlights
+            document.querySelectorAll('.state-circle').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.transition-path').forEach(el => {
+                el.classList.remove('active');
+                el.setAttribute('marker-end', 'url(#arrowhead)');
+            });
+            document.querySelectorAll('.transition-label').forEach(el => el.classList.remove('active'));
+            
+            // Find transition path
+            let transId = null;
+            if (from === 'S0' && to === 'S5') transId = 'trans-s0-s5';
+            else if (from === 'S0' && to === 'S10') transId = 'trans-s0-s10';
+            else if (from === 'S0' && to === 'S15') transId = 'trans-s5-s15'; // Skip to S15
+            else if (from === 'S5' && to === 'S10') transId = 'trans-s5-s10';
+            else if (from === 'S5' && to === 'S15') transId = 'trans-s5-s15';
+            else if (from === 'S10' && to === 'S15' && input === 5) transId = 'trans-s10-s15';
+            else if (from === 'S10' && to === 'S15') transId = 'trans-s10-s15-d';
+            else if (from === 'S15' && to === 'S0') transId = 'trans-s15-s0';
+            
+            if (transId) {
+                const path = document.getElementById(transId);
+                if (path) {
+                    path.classList.add('active');
+                    path.setAttribute('marker-end', 'url(#arrowhead-active)');
+                }
+            }
+            
+            // Highlight new state
+            document.getElementById(`state-${to.toLowerCase()}`).classList.add('active');
+        }
+        
+        function updateDisplay() {
+            // Update amount
+            document.getElementById('amount-display').textContent = 
+                '$' + (currentAmount / 100).toFixed(2);
+            
+            // Update message
+            const msgEl = document.getElementById('message-display');
+            if (currentAmount >= PRICE) {
+                msgEl.textContent = 'Press DISPENSE!';
+            } else {
+                const needed = PRICE - currentAmount;
+                msgEl.textContent = `Need ${needed}¢ more...`;
+            }
+            
+            // Update buttons
+            document.getElementById('dispense-btn').disabled = currentAmount < PRICE;
+            document.getElementById('refund-btn').disabled = currentAmount === 0;
+            
+            // Update state description
+            const descriptions = {
+                S0: '<strong>S0 (0¢)</strong> — Waiting for coins. Need 15¢ total.',
+                S5: '<strong>S5 (5¢)</strong> — Have 5¢. Need 10¢ more.',
+                S10: '<strong>S10 (10¢)</strong> — Have 10¢. Need 5¢ more!',
+                S15: '<strong>S15 (15¢+)</strong> — Enough money! Ready to dispense.'
+            };
+            document.getElementById('state-description').innerHTML = descriptions[currentState];
+            
+            // Update table
+            document.querySelectorAll('.state-table tbody tr').forEach(row => {
+                row.classList.remove('current');
+            });
+            document.getElementById(`row-${currentState.toLowerCase()}`).classList.add('current');
+        }
+        
+        // Initialize
+        updateDisplay();
+    </script>
+</body>
+</html>
