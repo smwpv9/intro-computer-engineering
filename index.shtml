@@ -45,12 +45,12 @@
             <span class="arrow">→</span>
           </button>
         </a>
-        <!--<a class="button-wrapper" href="./circuits/TODO.html">
+        <a class="button-wrapper" href="./circuits/sequential.html">
           <button>
             <span class="button-text">Sequential Circuits</span>
             <span class="arrow">→</span>
           </button>
-        </a>-->
+        </a>
         <a class="button-wrapper" href="./fsm/chooseFSM.shtml">
           <button>
             <span class="button-text">Finite State Machines</span>

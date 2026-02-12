@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sequential Circuit Simulation</title>
+    <link rel="stylesheet" href="./circuits.css">
+    <script src="./sequential.js"></script>
+</head>
+<body onload="loadCircuit('sr_latch')">
+
+<div id="sidebar">
+    <h2 style="margin:0 0 20px 0">Sequential Circuit Simulation</h2>
+    
+    <label>Active Circuit:</label>
+    <select id="circuitSelector" onchange="loadCircuit(this.value)" style="width:100%; padding:10px; border-radius:4px; margin-bottom:10px;">
+        <option value="sr_latch">SR Latch</option>
+        <option value="d_latch">D Latch</option>
+        <option value="d_flipflop">D Flipflop</option>
+        <option value="cell">Cell</option>
+        <!--<option value="memory">4x3 Memory Circuit</option>-->
+    </select>
+
+    <div id="truth-table" class="table-container"></div>
+
+    <div class="btn-group">
+        <button class="btn-random" onclick="random()">Random Inputs</button>
+        <button class="btn-reset" onclick="zero()">Zero Inputs</button>
+    </div>
+</div>
+<main>
+<div id="svg-host"></div>
+<div id="detail"></div>
+</main>
+</body>
+</html>

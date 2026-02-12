@@ -12,7 +12,7 @@
 body { font-family: 'Inter', system-ui, sans-serif; margin: 0; display: flex; height: 100vh; background: #f8fafc; }
 
 /* Sidebar UI */
-#sidebar { width: 350px; background: var(--sidebar-bg); color: white; padding: 25px; display: flex; flex-direction: column; box-shadow: 4px 0 15px rgba(0,0,0,0.2); }
+#sidebar { flex-grow:5; width: 350px; background: var(--sidebar-bg); color: white; padding: 25px; display: flex; flex-direction: column; box-shadow: 4px 0 15px rgba(0,0,0,0.2); }
 
 .table-container { flex-grow: 1; margin: 20px 0; overflow-y: auto; background: #1a202c; border-radius: 8px; border: 1px solid #4a5568; }
 table { width: 100%; border-collapse: collapse; font-size: 12px; }
@@ -20,8 +20,10 @@ th, td { padding: 10px; border-bottom: 1px solid #2d3748; text-align: center; }
 .active-row { background: #2d3748; border-left: 4px solid var(--accent); }
 
 /* Canvas */
-#svg-host { flex-grow: 1; display: flex; align-items: center; justify-content: center; position: relative; }
+main { flex-grow:1; display: flex; justify-content: center; position: relative; flex-direction: column; max-height:100%;}
+#svg-host { flex-grow: 1; display: flex; align-items: center; justify-content: center; position: relative; max-height: 88% }
 #svg-host svg { max-width: 100%; max-height: 100%; height: fit-content; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1)); }
+#detail { display: flex; align-items: left; justify-content: left; position: relative; padding: 20px; background-color: var(--sidebar-bg); color: white; flex-grow:1; }
 
 /* Logic Classes (Targets SVG IDs) */
 .on { fill: var(--wire-on); }
