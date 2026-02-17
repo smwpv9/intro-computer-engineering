@@ -1,0 +1,860 @@
+import { Memory } from "./memory"
+import { Bit, Bits, b } from "utils/bits"
+import { TruthTable } from "utils/truthTable"
+import { consoleChars, consoleNum, consoleWriteChars, consoleWriteNum, HALT, randomNum, stackStart, textStart } from "./constants"
+import { intToStr } from "utils/radix"
+
+enum MemSize {
+	Byte,
+	HalfWord,
+	Word,
+}
+enum State {
+	FETCH,
+	DECODE,
+	EXECUTE,
+	MEMORY,
+	WRITEBACK,
+	Start,
+}
+enum ALUOp {
+	Add,
+	ShiftLeft,
+	SetLessThan,
+	SetLessThanUnsigned,
+	Xor,
+	ShiftRight,
+	Or,
+	And,
+}
+enum WriteDataSrc {
+	MemRead,
+	ALUOut,
+	PC4,
+	Imm,
+}
+enum ALUSrc1 {
+	PC,
+	Reg1,
+}
+enum ALUSrc2 {
+	Imm,
+	Reg2,
+}
+enum PCSrc {
+	PC4,
+	JumpControl,
+}
+enum JumpControlSrc {
+	PCImm,
+	RS1Imm,
+}
+enum MemAddrSrc {
+	PC,
+	ALUOut,
+}
+
+export interface Component {
+	/**
+	 * Read inputs, update state, store outputs
+	 */
+	rising_edge(): void
+	/**
+	 * Update outputs
+	 */
+	falling_edge(): void
+	/**
+	 * Reset the outputs to a valid state
+	 */
+	reset_outputs(): void
+}
+
+export class EndOfProgram extends Error { }
+
+/**
+ * Components should be run in this order:
+ * 1. Control
+ * 2. Muxes
+ * 3. Everything else
+ */
+
+export class Wires {
+	// Instruction Memory
+	/* Set By Control */
+	public loadInstr: Bit = 0;
+	// intr = memReadData
+	/* Set By Instruction Memory */
+	public opcode: Bits = []; // 7 bits
+	public funct3: Bits = []; // 3 bits
+	public funct7: Bits = []; // 7 bits
+	public immediate: Bits = []; // 32 bits
+
+	// RAM
+	/* Set By Control */
+	public memWrite: Bit = 0;
+	public memSize: MemSize = 0; // 2 bits (byte/half-word/word)
+	public memUnsigned: Bit = 0; // 1 bit (whether to sign extend the output from memory)
+	/* Set By MemAddrMux */
+	public memAddress: Bits = []; // 32 bits
+	// writeData = reg2
+	/* Set By RAM */
+	public memReadData: Bits = []; // 32 bits
+
+	// PC
+	/* Set By PC */
+	public pcVal: Bits = Bits(0n, 32); // 32 bits
+	public pcVal4: Bits = Bits(4n, 32); // 32 bits
+	/* Set By PCSrcMux */
+	public pcIn: Bits = []; // 32 bits
+	/* Set By Control */
+	public loadPC: Bit = 0;
+
+	// Jump Control
+	/* Set By Control */
+	public branchZero: Bit = 0;
+	public branchNotZero: Bit = 0;
+	public jumpControlSrc: JumpControlSrc = 0; // 1 bit
+	/* Set By Jump Control */
+	public jumpAddr: Bits = []; // 32 bits
+
+	// ALU
+	/* Set By Control */
+	public aluOp: ALUOp = 0; // 4 bits
+	public aluAlt: Bit = 0;
+	public aluCalc: Bit = 0;
+	/* Set By ALUSrcMux1 File */
+	public aluIn1: Bits = []; // 32 bits
+	/* Set By ALUSrcMux2 */
+	public aluIn2: Bits = []; // 32 bits
+	/* Set By ALU */
+	public aluOut: Bits = []; // 32 bits
+	public aluZero: Bit = 0;
+
+	// Register File
+	/* Set By Instruction Memory */
+	public readReg1: Bits = []; // 5 bits
+	public readReg2: Bits = []; // 5 bits
+	public writeReg: Bits = []; // 5 bits
+	/* Set By Register File */
+	public readData1: Bits = []; // 32 bits
+	public readData2: Bits = []; // 32 bits
+	/* Set By WriteDataMux */
+	public writeData: Bits = []; // 32 bits
+	/* Set By Control */
+	public regWrite: Bit = 0;
+
+	// WriteDataMux
+	/* Set By Control */
+	public writeDataMuxSrc: WriteDataSrc = 0; // 2 bits
+
+	// ALUSrc1Mux
+	/* Set By Control */
+	public aluSrc1: ALUSrc1 = 0; // 2 bits
+
+	// ALUSrc2Mux
+	/* Set By Control */
+	public aluSrc2: ALUSrc2 = 0; // 1 bit
+
+	// PCSrcMux
+	/* Set By Jump Control */
+	public pcSrc: PCSrc = 0; // 1 bit
+
+	// MemAddrMux
+	/* Set By Control */
+	public memAddrMuxSrc: MemAddrSrc = 0; // 1 bit
+}
+
+export class ControlFSM implements Component {
+	public skip_mem: Bit = 0;
+	public state: State = State.Start;
+	private wires: Wires;
+
+	/*
+	Signals:
+		Instruction Memory:
+			loadInstr
+		RAM:
+			memWrite
+			memSize
+			memUnsigned
+		PC:
+			loadPC
+		Jump Control:
+			branchZero
+			branchNotZero
+			jumpControlSrc
+		ALU:
+			aluOp
+			aluAlt
+			aluCalc
+		Register File:
+			regWrite
+		WriteDataMux:
+			writeDataMuxSrc
+		ALUSrc1Mux:
+			aluSrc1
+		ALUSrc2Mux:
+			aluSrc2
+		MemAddrMux:
+			memAddrMuxSrc
+	*/
+
+	// Takes opcode
+	// Returns [aluAlt, aluOp, aluSrc1, aluSrc2, aluCalc]
+	private static alu_table = new TruthTable<[(funct3: Bits, funct7: Bits) => [Bit, ALUOp], ALUSrc1, ALUSrc2, Bit]>([
+		// R Type: funct7[5] determines add/sub and srl/sra. funct3 is always the same as the ALUOp
+		[["0110011"], [(funct3, funct7) => [funct7[5], Bits.toNumber(funct3) as ALUOp], ALUSrc1.Reg1, ALUSrc2.Reg2, 1]],
+		// I Type: Same as R type, funct3 determines the ALU op exactly. No weirdness with aluAlt this time
+		[["0010011"], [(funct3, _7) => [0, Bits.toNumber(funct3) as ALUOp], ALUSrc1.Reg1, ALUSrc2.Imm, 1]],
+		// AUIPC
+		[["0010111"], [(_3, _7) => [0, ALUOp.Add], ALUSrc1.PC, ALUSrc2.Imm, 1]],
+		// Load/Store
+		[["0X00011"], [(_3, _7) => [0, ALUOp.Add], ALUSrc1.Reg1, ALUSrc2.Imm, 1]],
+		// Branch: funct3[1:2] determines the ALUOp
+		[["1100011"], [(funct3, _7) => [1, Bits.toNumber(funct3.slice(1, 3)) as ALUOp], ALUSrc1.Reg1, ALUSrc2.Reg2, 1]],
+		// JALR
+		[["1100111"], [(_3, _7) => [0, ALUOp.Add], ALUSrc1.Reg1, ALUSrc2.Imm, 1]],
+		// JAL
+		[["1101111"], [(_3, _7) => [0, ALUOp.Add], ALUSrc1.PC, ALUSrc2.Imm, 1]],
+		// Anything else doesn't use the ALU, so return default values
+		[["XXXXXXX"], [(_3, _7) => [0, ALUOp.Add], ALUSrc1.Reg1, ALUSrc2.Reg2, 0]],
+	]);
+
+	// Takes opcode
+	// Returns whether the memory stage should be skipped
+	private static should_skip_memory = new TruthTable<Bit>([
+		// Load
+		[["0000011"], 0],
+		// Store
+		[["0100011"], 0],
+		// Anything else doesn't use memory, so return 1
+		[["XXXXXXX"], 1],
+	]);
+
+	// Takes opcode, funct3
+	// Returns [memWrite, memAddrMuxSrc, memSize, memUnsigned]
+	private static memory_table = new TruthTable<[Bit, MemAddrSrc, MemSize, Bit]>([
+		// Load
+		[["0000011", "000"], [0, MemAddrSrc.ALUOut, MemSize.Byte, 0]],
+		[["0000011", "001"], [0, MemAddrSrc.ALUOut, MemSize.HalfWord, 0]],
+		[["0000011", "X10"], [0, MemAddrSrc.ALUOut, MemSize.Word, 0]], // Word isn't sign extended, so sign doesn't matter
+		[["0000011", "100"], [0, MemAddrSrc.ALUOut, MemSize.Byte, 1]],
+		[["0000011", "101"], [0, MemAddrSrc.ALUOut, MemSize.HalfWord, 1]],
+		// Store
+		[["0100011", "000"], [1, MemAddrSrc.ALUOut, MemSize.Byte, 0]],
+		[["0100011", "001"], [1, MemAddrSrc.ALUOut, MemSize.HalfWord, 0]],
+		[["0100011", "010"], [1, MemAddrSrc.ALUOut, MemSize.Word, 0]],
+		// Anything else doesn't use memory, so return default values
+		[["XXXXXXX", "XXX"], [0, MemAddrSrc.PC, MemSize.Word, 0]],
+	]);
+
+	// Takes opcode
+	// Returns [regWrite, writeDataMuxSrc]
+	private static register_table = new TruthTable<[Bit, WriteDataSrc]>([
+		// R or I Type
+		[["0X10011"], [1, WriteDataSrc.ALUOut]],
+		// AUIPC
+		[["0010111"], [1, WriteDataSrc.ALUOut]],
+		// LUI
+		[["0110111"], [1, WriteDataSrc.Imm]],
+		// Load
+		[["0000011"], [1, WriteDataSrc.MemRead]],
+		// Jump
+		[["110X111"], [1, WriteDataSrc.PC4]],
+		// ecall
+		[["1110011"], [1, WriteDataSrc.PC4]],
+		// Doesn't write to a register
+		[["XXXXXXX"], [0, WriteDataSrc.ALUOut]],
+	]);
+
+	// Takes opcode, funct3
+	// Returns [branchZero, branchNotZero, jumpControlSrc
+	private static jump_table = new TruthTable<[Bit, Bit, JumpControlSrc]>([
+		[["1100111", "XXX"], [1, 1, JumpControlSrc.RS1Imm]], // JALR
+		[["1101111", "XXX"], [1, 1, JumpControlSrc.PCImm]], // JAL
+		[["1100011", "000"], [1, 0, JumpControlSrc.PCImm]], // BEQ
+		[["1100011", "001"], [0, 1, JumpControlSrc.PCImm]], // BNE
+		[["1100011", "100"], [0, 1, JumpControlSrc.PCImm]], // BLT
+		[["1100011", "101"], [1, 0, JumpControlSrc.PCImm]], // BGE
+		[["1100011", "110"], [0, 1, JumpControlSrc.PCImm]], // BLTU
+		[["1100011", "111"], [1, 0, JumpControlSrc.PCImm]], // BGEU
+		[["1110011", "XXX"], [1, 1, JumpControlSrc.RS1Imm]], // ECALL
+		[["XXXXXXX", "XXX"], [0, 0, JumpControlSrc.PCImm]], // Not a Jump
+	]);
+
+	constructor(wires: Wires) {
+		this.wires = wires;
+	}
+
+	/**
+	 * Control FSM can break the rules, because it needs to be special in order to work. Because of this, it must be run first.
+	 */
+	rising_edge() {
+		this.reset_outputs();
+
+		if (this.state == State.FETCH) {
+			// Load next instruction, so it's ready next cycle
+			this.wires.memSize = MemSize.Word;
+			this.wires.memAddrMuxSrc = MemAddrSrc.PC;
+		}
+		else if (this.state == State.DECODE) {
+			// Memory is outputting the instruction, so tell instruction memory to load it
+			this.wires.loadInstr = 1;
+		}
+		else if (this.state == State.EXECUTE) {
+			// Set up ALU
+			let [func, aluSrc1, aluSrc2, aluCalc] = ControlFSM.alu_table.match(this.wires.opcode);
+			let [aluAlt, aluOp] = func(this.wires.funct3, this.wires.funct7);
+			this.wires.aluAlt = aluAlt;
+			this.wires.aluOp = aluOp;
+			this.wires.aluSrc1 = aluSrc1;
+			this.wires.aluSrc2 = aluSrc2;
+			this.wires.aluCalc = aluCalc;
+
+			// Skip memory if necessary
+			this.skip_mem = ControlFSM.should_skip_memory.match(this.wires.opcode);
+		}
+		else if (this.state == State.MEMORY) {
+			// Write to or read from memory
+			let [memWrite, memAddrMuxSrc, memSize, memUnsigned] = ControlFSM.memory_table.match(this.wires.opcode, this.wires.funct3);
+			this.wires.memWrite = memWrite;
+			this.wires.memAddrMuxSrc = memAddrMuxSrc;
+			this.wires.memSize = memSize;
+			this.wires.memUnsigned = memUnsigned;
+		}
+		else if (this.state == State.WRITEBACK) {
+			// Write to register file
+			let [regWrite, writeDataMuxSrc] = ControlFSM.register_table.match(this.wires.opcode, this.wires.funct3);
+            
+    		this.wires.regWrite = regWrite;
+			this.wires.writeDataMuxSrc = writeDataMuxSrc;
+
+			// Set up jump controller
+			let [branchZero, branchNotZero, jumpControlSrc] = ControlFSM.jump_table.match(this.wires.opcode, this.wires.funct3);
+			this.wires.branchZero = branchZero;
+			this.wires.branchNotZero = branchNotZero;
+			this.wires.jumpControlSrc = jumpControlSrc;
+
+			// Inc/branch PC (determined by jump control)
+			this.wires.loadPC = 1;
+		}
+	}
+
+	/**
+	 * Updates state based on the current state.
+	 * FETCH -> DECODE -> EXECUTE -> MEMORY -> WRITEBACK
+	 */
+	falling_edge() {
+		this.state = this.state + 1;
+		if (this.state > State.WRITEBACK) {
+			this.state = State.FETCH;
+		}
+		if (this.skip_mem && this.state == State.MEMORY) {
+			this.state = State.WRITEBACK;
+		}
+	}
+
+	// Resets all outputs, because this component is purely combinational
+	reset_outputs() {
+		this.skip_mem = 0;
+		this.wires.loadInstr = 0;
+		this.wires.memWrite = 0;
+		this.wires.memSize = MemSize.Word;
+		this.wires.memUnsigned = 0;
+		this.wires.loadPC = 0;
+		this.wires.branchZero = 0;
+		this.wires.branchNotZero = 0;
+		this.wires.jumpControlSrc = JumpControlSrc.PCImm;
+		this.wires.aluOp = ALUOp.Add;
+		this.wires.aluAlt = 0;
+		this.wires.aluCalc = 0;
+		this.wires.regWrite = 0;
+		this.wires.writeDataMuxSrc = WriteDataSrc.Imm;
+		this.wires.aluSrc1 = ALUSrc1.Reg1;
+		this.wires.aluSrc2 = ALUSrc2.Reg2;
+		this.wires.memAddrMuxSrc = MemAddrSrc.PC;
+	}
+}
+
+export class InstructionRegister implements Component {
+	public instruction: Bits = Bits(0x0000_0013n, 32);
+	private wires: Wires;
+
+	private static immediate_table = new TruthTable<(i: Bits) => Bits>([
+		// R-type -> no immediate
+		[["0110011"], (i) => b`0`],
+		// I-type (IOps & Loads) -> imm[11:0] | rs1 | funct3 | rd
+		[["00X0011"], (i) => i.slice(20, 32)],
+		// I-type (JALR) -> imm[11:0] | rs1 | funct3 | rd
+		[["1100111"], (i) => i.slice(20, 32)],
+		// I-type (ECALL) -> imm[11:0] | rs1 | funct3 | rd
+		[["1110011"], (i) => i.slice(20, 32)],
+		// S-type -> imm[11:5] | rs2 | rs1 | funct3 | imm[4:0]
+		[["0100011"], (i) => Bits.join(i.slice(25, 32), i.slice(7, 12))],
+		// SB-type -> imm[12|10:5] | rs2 | rs1 | funct3 | imm[4:1|11]
+		[["1100011"], (i) => Bits.join(i[31], i[7], i.slice(25, 31), i.slice(8, 12), 0)],
+		// U-type -> imm[19:0] | rd | opcode
+		[["0X10111"], (i) => Bits.join(i.slice(12, 32), Bits(0n, 12))],
+		// UJ-type -> imm[20|10:1|11|19:12] | rd | opcode
+		[["1101111"], (i) => Bits.join(i[31], i.slice(12, 20), i[20], i.slice(21, 31), 0)],
+		// Unknown -> Throw error
+		[["XXXXXXX"], (i) => { throw new Error("Unknown instruction " + intToStr(i, "hex")); }],
+	])
+
+	constructor(wires: Wires) {
+		this.wires = wires;
+	}
+
+	/**
+	 * Unfortunately, we have to do this on the rising edge because we need the register file to output rs1 and rs2 before the execute stage
+	 */
+	rising_edge() {
+		// Load the instruction from memory
+		if (this.wires.loadInstr) {
+			this.instruction = this.wires.memReadData;
+		}
+
+		// Check if we've encountered the end of the program (0x0000_0000)
+		if (this.instruction.every((b, i) => b == HALT[i])) {
+			throw new EndOfProgram();
+		}
+
+		this.wires.opcode = this.instruction.slice(0, 7);
+		this.wires.writeReg = this.instruction.slice(7, 12);
+        if(Bits.equal(this.wires.opcode, b`1110011`)) // fix ecall/ebreak instructions
+                this.wires.writeReg = b`00001`; // to use ra as link register
+            
+		this.wires.funct3 = this.instruction.slice(12, 15);
+		this.wires.readReg1 = this.instruction.slice(15, 20);
+		this.wires.readReg2 = this.instruction.slice(20, 25);
+		this.wires.funct7 = this.instruction.slice(25, 32);
+
+		let imm_gen = InstructionRegister.immediate_table.match(this.wires.opcode);
+		let imm = imm_gen(this.instruction);
+		this.wires.immediate = Bits.extended(imm, 32, true);
+	}
+
+	falling_edge() {
+	}
+
+	reset_outputs() {
+		this.wires.opcode = Bits(0n, 7);
+		this.wires.writeReg = Bits(0n, 5);
+		this.wires.funct3 = Bits(0n, 3);
+		this.wires.readReg1 = Bits(0n, 5);
+		this.wires.readReg2 = Bits(0n, 5);
+		this.wires.funct7 = Bits(0n, 7);
+		this.wires.immediate = Bits(0n, 32);
+	}
+}
+
+export class RAM implements Component {
+	public data: Memory;
+	public last_data_read: Bits = Bits(0n, 32);
+	public readOutput: Bits = []; // 32 bits
+	public consoleInputBuffer: string = "";
+	public consoleOutput: string = "";
+	private consoleDelay: number = 0;
+	private consoleRegs: bigint[] = Array(10).fill(0n);
+	private wires: Wires;
+	private static format = new TruthTable<number>([
+		[["00"], 1], // byte
+		[["01"], 2], // half-word
+		[["10"], 4], // word
+	]);
+
+	constructor(wires: Wires) {
+		this.data = new Memory(2n ** 32n);
+		this.wires = wires;
+	}
+
+	rising_edge() {
+		let addr = Bits.toInt(this.wires.memAddress, false);
+		let data = Bits.toInt(this.wires.readData2, false);
+		let size = RAM.format.match(this.wires.memSize);
+
+		let output = this.update(addr, size, data, this.wires.memWrite);
+
+		this.consoleDelay = this.consoleDelay == 0 ? 0 : this.consoleDelay - 1;
+		if (this.consoleDelay == 0) {
+			this.consoleRegs[5] &= 0x0Fn;
+			this.consoleDelay = Math.floor(Math.random() * 5) + 5;
+		}
+
+		let bits = Bits(output, size * 8);
+		this.readOutput = Bits.extended(bits, 32, this.wires.memUnsigned == 0);
+
+		if (this.wires.memAddrMuxSrc == MemAddrSrc.ALUOut) {
+			this.last_data_read = this.readOutput;
+		}
+	}
+
+	falling_edge() {
+		this.wires.memReadData = this.readOutput;
+	}
+
+	reset_outputs() { }
+
+	update(addr: bigint, size: number, data: bigint, write: Bit): bigint {
+		// Update console input buffer
+		if (this.consoleInputBuffer.length > 0 && this.consoleRegs[0] != 0x1Fn) {
+			let currentAmount;
+			if ((this.consoleRegs[0] & 0x10n) == 0n)
+				currentAmount = 0n;
+			else
+				currentAmount = (this.consoleRegs[0] & 0xFn) + 1n;
+			let addAmount = Math.min(this.consoleInputBuffer.length, Number(16n - currentAmount));
+			let string = this.consoleInputBuffer.slice(0, addAmount);
+			this.consoleInputBuffer = this.consoleInputBuffer.slice(addAmount);
+			// Write read amount
+			this.consoleRegs[0] = 0x10n | ((currentAmount == 0n ? -1n : currentAmount) + BigInt(addAmount));
+			// Write chars into the regs
+			for (let i = Number(currentAmount); i < Number(currentAmount) + addAmount; i++) {
+				let ind = Math.floor(i / 4) + 1;
+				let offset = BigInt(i % 4) * 8n;
+				let charCode = BigInt(string.charCodeAt(i - Number(currentAmount)));
+				this.consoleRegs[ind] = (this.consoleRegs[ind] & ~(0xFFn << offset)) | (charCode << offset);
+			}
+		}
+		// Program address range
+		if (addr >= consoleNum && addr + BigInt(size) <= consoleWriteChars + 16n) {
+			if (write) {
+				// Prevent writing to consoleChars
+				if (addr >= consoleChars && addr < consoleChars + 16n) {
+					throw new Error("Tried to write to a read-only console register: " + addr.toString(16));
+				}
+				// Check if we're writing to consoleWriteNum with the valid bit set
+				if (addr == consoleWriteNum && (data & 0x10n) == 0x10n) {
+					// Check if the wait bit is still set
+					if ((this.consoleRegs[5] & 0x10n) == 0x10n) {
+						throw new Error("Tried to write to console output while it hadn't finished processing the last write");
+					}
+
+					let num = (data & 0xFn) + 1n;
+					for (let i = 0; i < num; i++) {
+						let offset = BigInt(i % 4) * 8n;
+						let charCode = 0xFFn & (this.consoleRegs[Math.floor(i / 4) + 6] >> offset);
+						let char = charCode >= 0 && charCode <= 127 ? String.fromCharCode(Number(charCode)) : "\uFFFD";
+						this.consoleOutput += char;
+					}
+					this.consoleDelay += 5;
+				}
+				// Write like noraml
+				let ind = Number((addr - consoleNum) / 4n);
+				let offset = (addr % 4n) * 8n;
+				let mask = size == 1 ? 0xFFn : size == 2 ? 0xFFFFn : 0xFFFF_FFFFn;
+				this.consoleRegs[ind] = (this.consoleRegs[ind] & ~(mask << offset)) | (data << offset);
+			}
+			// Read from console
+			addr = addr - consoleNum;
+			let ind = Number(addr / 4n);
+			if (ind > 10) {
+				throw new Error("Invalid memory address: " + addr.toString(16))
+			}
+			let offset = addr % 4n;
+			let mask = size == 1 ? 0xFFn : size == 2 ? 0xFFFFn : 0xFFFF_FFFFn;
+			return mask & (this.consoleRegs[ind] >> (offset * 8n))
+		} else if (addr >= randomNum && addr + BigInt(size) <= randomNum + 4n) {
+			if (write) {
+				throw new Error("Tried to write to read-only memory address: " + addr.toString(16));
+			}
+			let mask = size == 1 ? 0xFF : size == 2 ? 0xFFFF : 0xFFFF_FFFF;
+			return BigInt(Math.floor(Math.random() * mask))
+		} else if (addr >= 0x0 && addr <= 0x170) { // OS memory
+			if (write)
+				this.data.store(addr, size, data);
+			return this.data.load(addr, size);
+        } else if (addr >= textStart) {
+			if (write)
+				this.data.store(addr, size, data);
+			return this.data.load(addr, size);
+		} else {
+			throw new Error("Invalid memory address: " + addr.toString(16))
+		}
+	}
+
+	dump(size: number) {
+		let dump = this.data.dump(size);
+		return this.addConsoleRegs(dump, size);
+	}
+
+	private *addConsoleRegs(orig: Generator<[bigint | [bigint, bigint], bigint]>, size: number): Generator<[bigint | [bigint, bigint], bigint]> {
+		yield* orig
+		for (let i = 0; i < 10; i++) {
+			if (size == 1) {
+				yield [0x0002_1000n + BigInt(i) * 4n + 0n, (this.consoleRegs[i] << 0n) & 0xFFn];
+				yield [0x0002_1000n + BigInt(i) * 4n + 1n, (this.consoleRegs[i] << 8n) & 0xFFn];
+				yield [0x0002_1000n + BigInt(i) * 4n + 2n, (this.consoleRegs[i] << 16n) & 0xFFn];
+				yield [0x0002_1000n + BigInt(i) * 4n + 3n, (this.consoleRegs[i] << 24n) & 0xFFn];
+			} else if (size == 2) {
+				yield [0x0002_1000n + BigInt(i) * 4n + 0n, (this.consoleRegs[i] << 0n) & 0xFFFFn];
+				yield [0x0002_1000n + BigInt(i) * 4n + 2n, (this.consoleRegs[i] << 16n) & 0xFFFFn];
+			} else if (size == 4) {
+				yield [0x0002_1000n + BigInt(i) * 4n, this.consoleRegs[i]];
+			}
+		}
+	}
+}
+
+export class PC implements Component {
+	public val: Bits = Bits(0n, 32, false);
+	private wires: Wires;
+
+	constructor(wires: Wires) {
+		this.wires = wires;
+	}
+
+	rising_edge() {
+		if (this.wires.loadPC) {
+			this.val = this.wires.pcIn;
+		}
+	}
+
+	falling_edge() {
+		this.wires.pcVal = this.val;
+
+		let nextVal = Bits.toInt(this.val, false) + 4n;
+		nextVal = nextVal & 0xFFFF_FFFFn; // Wrap in case of overflow
+		this.wires.pcVal4 = Bits(nextVal, 32);
+	}
+
+	reset_outputs() { }
+}
+
+export class JumpControl implements Component {
+	// Controls PCSrc and JumpAddr
+	private wires: Wires;
+
+	constructor(wires: Wires) {
+		this.wires = wires;
+	}
+
+	// Combinational, so everything changes on rising edge
+	rising_edge() {
+		let shouldBranch = (this.wires.branchZero && this.wires.aluZero) || (this.wires.branchNotZero && !this.wires.aluZero);
+		this.wires.pcSrc = shouldBranch ? PCSrc.JumpControl : PCSrc.PC4;
+
+		let baseBits = this.wires.jumpControlSrc == JumpControlSrc.PCImm ? this.wires.pcVal : this.wires.readData1;
+		let base = Bits.toInt(baseBits, false);
+		let offset = Bits.toInt(this.wires.immediate, true);
+		let jumpAddr = base + offset;
+
+		this.wires.jumpAddr = Bits(jumpAddr, 33).slice(0, 32);
+	}
+
+	falling_edge() { }
+
+	reset_outputs() { }
+}
+
+export class ALU implements Component {
+	public output: Bits = Bits(0n, 32, true);
+	public zero: Bit = 1;
+	public in1 = Bits(0n, 32);
+	public in2 = Bits(0n, 32);
+	public op: ALUOp = 0;
+	public alt: Bit = 0;
+	private wires: Wires;
+
+
+	private static table = new TruthTable<[boolean, (a: bigint, b: bigint) => bigint]>([
+		[["000", "0"], [true, (a, b) => a + b]], // Add
+		[["000", "1"], [true, (a, b) => a - b]], // Sub
+		[["001", "X"], [true, (a, b) => a << (b & 0x1Fn)]], // Shift Left Logical
+		[["010", "X"], [true, (a, b) => BigInt(a < b)]], // Set Less Than
+		[["011", "X"], [false, (a, b) => BigInt(a < b)]], // Set Less Than Unsigned
+		[["100", "X"], [true, (a, b) => a ^ b]], // Xor
+		[["101", "0"], [false, (a, b) => a >> (b & 0x1Fn)]], // Shift Right Logical
+		[["101", "1"], [true, (a, b) => a >> (b & 0x1Fn)]], // Shift Right Arithmetic
+		[["110", "X"], [true, (a, b) => a | b]], // Or
+		[["111", "X"], [true, (a, b) => a & b]], // And
+	]);
+
+	constructor(wires: Wires) {
+		this.wires = wires;
+	}
+
+	rising_edge() {
+		if (this.wires.aluCalc) {
+			let [signed, op] = ALU.table.match(this.wires.aluOp as number, this.wires.aluAlt);
+
+			let in1 = Bits.toInt(this.wires.aluIn1, signed);
+			this.in1 = this.wires.aluIn1;
+			let in2 = Bits.toInt(this.wires.aluIn2, signed);
+			this.in2 = this.wires.aluIn2;
+
+			this.op = this.wires.aluOp;
+			this.alt = this.wires.aluAlt;
+
+			this.output = Bits(op(in1, in2), 33, signed).slice(0, 32);
+			this.zero = this.output.every(b => b == 0);
+		}
+	}
+
+	falling_edge() {
+		this.wires.aluOut = this.output;
+		this.wires.aluZero = this.zero;
+	}
+
+	reset_outputs() {
+		this.output = Bits(0n, 32);
+		this.zero = 1;
+		this.wires.aluOut = Bits(0n, 32);
+		this.wires.aluZero = 0;
+		this.in1 = Bits(0n, 32);
+		this.in2 = Bits(0n, 32);
+		this.op = 0;
+		this.alt = 0;
+	}
+}
+
+export class RegisterFile implements Component {
+	public registers: Bits[];
+	public out1: Bits = Bits(0n, 32);
+	public out2: Bits = Bits(0n, 32);
+	private wires: Wires;
+
+	constructor(wires: Wires) {
+		this.registers = Array(32).fill(Bits(0n, 32));
+		this.wires = wires;
+	}
+
+	rising_edge() {
+		let reg1 = Bits.toNumber(this.wires.readReg1, false);
+		let reg2 = Bits.toNumber(this.wires.readReg2, false);
+		this.out1 = this.registers[reg1];
+		this.out2 = this.registers[reg2];
+
+		if (this.wires.regWrite) {
+			let writeReg = Bits.toNumber(this.wires.writeReg, false);
+			if (writeReg != 0)
+				this.registers[writeReg] = [...this.wires.writeData];
+		}
+	}
+
+	falling_edge() {
+		this.wires.readData1 = this.out1;
+		this.wires.readData2 = this.out2;
+	}
+
+	reset_outputs() {
+		this.out1 = Bits(0n, 32);
+		this.out2 = Bits(0n, 32);
+		this.wires.readData1 = Bits(0n, 32);
+		this.wires.readData2 = Bits(0n, 32);
+	}
+}
+
+export class WriteDataMux implements Component {
+	private wires: Wires;
+
+	constructor(wires: Wires) {
+		this.wires = wires;
+	}
+
+	rising_edge() {
+		if (this.wires.writeDataMuxSrc == WriteDataSrc.ALUOut) {
+			this.wires.writeData = this.wires.aluOut;
+		} else if (this.wires.writeDataMuxSrc == WriteDataSrc.MemRead) {
+			this.wires.writeData = this.wires.memReadData;
+		} else if (this.wires.writeDataMuxSrc == WriteDataSrc.PC4) {
+			this.wires.writeData = this.wires.pcVal4;
+		} else if (this.wires.writeDataMuxSrc == WriteDataSrc.Imm) {
+			this.wires.writeData = this.wires.immediate;
+		}
+	}
+
+	falling_edge() { }
+
+	reset_outputs() {
+		this.wires.writeData = Bits(0n, 32);
+	}
+}
+
+export class ALUSrcMux1 implements Component {
+	private wires: Wires;
+
+	constructor(wires: Wires) {
+		this.wires = wires;
+	}
+
+	rising_edge() {
+		if (this.wires.aluSrc1 == ALUSrc1.Reg1) {
+			this.wires.aluIn1 = this.wires.readData1;
+		} else if (this.wires.aluSrc1 == ALUSrc1.PC) {
+			this.wires.aluIn1 = this.wires.pcVal;
+		}
+	}
+
+	falling_edge() { }
+
+	reset_outputs() {
+		this.wires.aluIn1 = Bits(0n, 32);
+	}
+}
+
+export class ALUSrcMux2 implements Component {
+	private wires: Wires;
+
+	constructor(wires: Wires) {
+		this.wires = wires;
+	}
+
+	rising_edge() {
+		if (this.wires.aluSrc2 == ALUSrc2.Reg2) {
+			this.wires.aluIn2 = this.wires.readData2;
+		} else if (this.wires.aluSrc2 == ALUSrc2.Imm) {
+			this.wires.aluIn2 = this.wires.immediate;
+		}
+	}
+
+	falling_edge() { }
+
+	reset_outputs() {
+		this.wires.aluIn2 = Bits(0n, 32);
+	}
+}
+
+export class PCSrcMux implements Component {
+	private wires: Wires;
+
+	constructor(wires: Wires) {
+		this.wires = wires;
+	}
+
+	rising_edge() {
+		if (this.wires.pcSrc == PCSrc.PC4) {
+			this.wires.pcIn = this.wires.pcVal4;
+		} else if (this.wires.pcSrc == PCSrc.JumpControl) {
+			this.wires.pcIn = this.wires.jumpAddr;
+		}
+	}
+
+	falling_edge() { }
+
+	reset_outputs() {
+		this.wires.pcIn = Bits(0n, 32);
+	}
+}
+
+export class MemAddrMux implements Component {
+	private wires: Wires;
+
+	constructor(wires: Wires) {
+		this.wires = wires;
+	}
+
+	rising_edge() {
+		if (this.wires.memAddrMuxSrc == MemAddrSrc.ALUOut) {
+			this.wires.memAddress = this.wires.aluOut;
+		} else if (this.wires.memAddrMuxSrc == MemAddrSrc.PC) {
+			this.wires.memAddress = this.wires.pcVal;
+		}
+	}
+
+	falling_edge() { }
+
+	reset_outputs() {
+		this.wires.memAddress = Bits(0n, 32);
+	}
+}
