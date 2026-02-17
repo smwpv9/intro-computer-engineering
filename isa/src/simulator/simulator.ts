@@ -25,6 +25,8 @@ export class Simulator {
 
 	private componentList: Comp.Component[] = [];
 
+    private breakpoints: Bits[] = [];
+
 	constructor(code: bigint[] = [], regs: Record<number, bigint> = {}) {
 		this.wires = new Comp.Wires();
 		// Combinational control units have to be run first, so the control signals can propogate the same cycle
@@ -81,6 +83,19 @@ export class Simulator {
 		}
 	}
 
+    updateBreakpoint(addr: Bits) {
+        const isAddr = (element: Bits) => Bits.equal(addr, element);
+        const index = this.breakpoints.findIndex(isAddr);
+        if(index > -1) {
+            this.breakpoints.splice(index,1);
+            return false;
+        }
+        else {
+            this.breakpoints.push(addr);
+            return true;
+        }
+    }
+
 	/**
 	 * Steps the simulation one clock tick. Returns false is the simulation has reached the
 	 * end of the program, true otherwise. The "end of the program" is the first 0x00000000
@@ -101,6 +116,9 @@ export class Simulator {
 					throw e;
 			}
 		}
+        if(this.breakpoints.some(brkp => Bits.equal(this.pc.val, brkp))) {
+            return "brkp";
+        }
 
 		return true
 	}

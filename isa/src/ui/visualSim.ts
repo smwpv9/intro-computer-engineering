@@ -393,7 +393,10 @@ export class VisualSim {
 				}
 			}
 			instrMemTable.append(`
-				<tr> <td>${intToStr(addr, "hex")}</td> <td>${intToStr(instr, "hex")}</td> <td>${label}${line}</td> </tr>
+				<tr id="${intToStr(addr, "hex")}"> <td>${intToStr(addr, "hex")}</td>
+                    <td> <input type="checkbox" onclick="sim.updateBreakpoint('${intToStr(addr, "hex")}')"/> </td>
+                    <td>${intToStr(instr, "hex")}</td> <td>${label}${line}</td>
+                </tr>
 			`)
 		}
 
@@ -686,7 +689,10 @@ export class VisualSim {
 			for (let i = 0; i < count; i++) {
 				try {
 					let canContinue = this.sim.tick()
-					if (!canContinue) {
+                    if(canContinue === "brkp") {
+                        this.pause();
+                    } 
+                    else if (!canContinue) {
 						this.state = "done"
 						break
 					}
@@ -737,6 +743,18 @@ export class VisualSim {
 
 		this.update()
 	}
+
+    public updateBreakpoint(addr: string) {
+        const addrbits = Bits(parseInt(addr, 'hex', 32), 32);
+        if(this.sim.updateBreakpoint(addrbits)) {
+            //added as breakpoint
+            $(this.instrMemPanel).find("#"+addr).addClass("breakpoint-instruction")
+        }
+        else {
+            //removed as breakpoint
+            $(this.instrMemPanel).find("#"+addr).removeClass("breakpoint-instruction")
+        }
+    }
 
 	/** Loads an example by name */
 	public async loadExample(name: string) {

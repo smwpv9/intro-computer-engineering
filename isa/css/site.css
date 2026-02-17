@@ -177,10 +177,13 @@ table.table-fit tbody td, table.table-fit tfoot td {
 	text-align: center;
 }
 
-.current-instruction {
+.current-instruction > td {
 	background-color: yellow
 }
 
+.breakpoint-instruction > td {
+	background-color: red
+}
 
 
 
