@@ -20,7 +20,7 @@ export const registerNames = [
 /** Maps register names to their number. */
 export const registers: Record<string, number> = {
     ...Object.fromEntries(registerNames.map((reg, num) => [reg, num])),
-    ...Object.fromEntries([...Array(32)].map((_, num) => [`x${num}`, num])),
+    ...Object.fromEntries([...Array(32)].map((_, num) => [`r${num}`, num])),
 }
 
 export const HALT: Bit[] = [];

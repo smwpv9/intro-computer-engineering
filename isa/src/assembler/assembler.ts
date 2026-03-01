@@ -55,17 +55,19 @@ function directiveMatch(directive: AsmDirective, line: number): Directive | stri
 		}
 		return { type: "DIR", data: data, size: size, line: line }
 	} else if (string.includes(directive.directive)) {
-		if (directive.args.length == 1 && directive.args[0].type == "any") {
-			let s = directive.args[0].value.substring(1, directive.args[0].value.length - 1) // Remove quotes
-			let data = []
-			for (let char of s) {
-				data.push(BigInt(char.charCodeAt(0)))
-			}
-			data.push(0n) // null terminator0x00A50533
-			return { type: "DIR", data: data, size: 1, line: line }
-		} else {
+		if (directive.args.length != 1) {
 			return "Invalid directive argument"
 		}
+        if (directive.args[0].type != "any") {
+            return "Invalid type of directive argument"
+        }
+		let s = directive.args[0].value.substring(1, directive.args[0].value.length - 1) // Remove quotes
+		let data = []
+		for (let char of s) {
+			data.push(BigInt(char.charCodeAt(0)))
+		}
+		data.push(0n) // null terminator0x00A50533
+		return { type: "DIR", data: data, size: 1, line: line }
 	} else if(machinecode.includes(directive.directive)) {
 		let data = []
         if(directive.args.length != 1) {
@@ -144,13 +146,38 @@ const instrRules: Rule[] = [
 	}, {
 		instructions: ["beq", "bge", "bgeu", "blt", "bltu", "bne"],
 		format: "basic",
-		signature: ["id", "id", "id"],
+		signature: ["id", "id", "any"],
 		conv: (op, [rs1, rs2, label], line) => ({ type: "SB", op: op, rs1: rs1, rs2: rs2, imm: label, line: line }),
+	}, {
+		instructions: ["ble"],
+		format: "basic",
+		signature: ["id", "id", "any"],
+		conv: (op, [rs1, rs2, label], line) => ({ type: "SB", op: "bge", rs1: rs2, rs2: rs1, imm: label, line: line }),
+	}, {
+		instructions: ["bleu"],
+		format: "basic",
+		signature: ["id", "id", "any"],
+		conv: (op, [rs1, rs2, label], line) => ({ type: "SB", op: "bgeu", rs1: rs2, rs2: rs1, imm: label, line: line }),
+	}, {
+		instructions: ["bgt"],
+		format: "basic",
+		signature: ["id", "id", "any"],
+		conv: (op, [rs1, rs2, label], line) => ({ type: "SB", op: "blt", rs1: rs2, rs2: rs1, imm: label, line: line }),
+	}, {
+		instructions: ["bgtu"],
+		format: "basic",
+		signature: ["id", "id", "any"],
+		conv: (op, [rs1, rs2, label], line) => ({ type: "SB", op: "bltu", rs1: rs2, rs2: rs1, imm: label, line: line }),
 	}, {
 		instructions: ["jalr"],
 		format: "displacement",
-		signature: ["id", "num", "id"],
+		signature: ["id", "any", "id"],
 		conv: (op, [rd, imm, rs1], line) => ({ type: "I", op: op, rd: rd, rs1: rs1, imm: imm, line: line }),
+	}, {
+		instructions: ["jr"],
+		format: "basic",
+		signature: ["id"],
+		conv: (op, [rs1], line) => ({ type: "I", op: "jalr", rd: "zero", rs1: rs1, imm: 0, line: line }),
 	}, {
 		instructions: ["jal"],
 		format: "basic",
@@ -164,7 +191,7 @@ const instrRules: Rule[] = [
 	}, {
 		instructions: ["j"],
 		format: "basic",
-		signature: ["id"],
+		signature: ["any"],
 		conv: (op, [label], line) => ({ type: "UJ", op: "jal", rd: "zero", imm: label, line: line }),
 	}, {
 		instructions: ["lui", "auipc"],
@@ -342,7 +369,13 @@ function assembleInstr(addr: bigint, instr: Instr, labels: Record<string, bigint
 		} else if (label.startsWith("%lo(")) {
 			label = label.substring(4, label.length - 1);
 			bits = "low";
-		}
+		} else if (label.startsWith("%pcrel_hi(")) {
+            label = label.substring(10, label.length -1);
+            bits = "pcrel_high";
+        } else if (label.startsWith("%pcrel_lo(")) {
+            label = label.substring(10, label.length -1);
+            bits = "pcrel_low";
+        }
 		// Check if it exists
 		if (!(label in labels)) throw Error(`Unknown label "${label}"`)
 		// Calculate the value
@@ -360,8 +393,12 @@ function assembleInstr(addr: bigint, instr: Instr, labels: Record<string, bigint
 		if (bits == "high") {
 			temp.imm = (temp.imm >> 12n) & 0xFFFFFn;
 		} else if (bits == "low") {
-			temp.imm = temp.imm & 0xFFFn;
-		}
+			temp.imm = (temp.imm) & 0xFFFn;
+		} else if (bits == "pcrel_high") {
+            temp.imm = ((temp.imm - addr) >> 12n) & 0xFFFFFn;
+        } else if (bits == "pcrel_low") {
+            temp.imm = (temp.imm - addr) & 0xFFFn;
+        }
 	}
 	// Parse registers
 	for (let field of ["rd", "rs1", "rs2"]) {

@@ -36,7 +36,12 @@ export const examples: Example[] = [
         name: "Guessing Game OS",
 		description: "A simple number guessing game using OS IO",
 		url: require("assets/examples/guessOS.s"),
-		dataMemRadix: "hex", regFileRadix: "hex",
-        
+		dataMemRadix: "hex", regFileRadix: "hex",   
+    }, {
+        name: "Every Instruction",
+        description: "An example of each instruction in their different forms",
+        url: require("assets/examples/everyInstruction.s"),
+        dataMemRadix: "hex", regFileRadix: "hex",
     }
+
 ]
