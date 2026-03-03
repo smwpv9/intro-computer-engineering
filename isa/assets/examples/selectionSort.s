@@ -5,7 +5,7 @@ MAIN:
     lui a0, %hi(ARRAY)
     addi a0, a0, %lo(ARRAY)
     lui a1, %hi(ARRAY_LEN)
-    lw a1, ARRAY_LEN(a1)
+    lw a1, %lo(ARRAY_LEN)(a1)
     jal ra, SEL_SORT
 
     j EXIT

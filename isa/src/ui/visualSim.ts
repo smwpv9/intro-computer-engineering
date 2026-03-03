@@ -221,6 +221,10 @@ export class VisualSim {
 			}
 		});
 
+        $(this.regFilePanel).on("change", "input:text", (event) => this.readNewRegisterValue(event))
+
+        $(this.dataMemPanel).on("change", "input:text", (event) => this.readNewMemoryValue(event))
+
 		// reformat number on input
 		$("#dataMem-radix, #dataMem-word-size, #regFile-radix, #showInstructions").on("change", (event) => this.updateEditorsAndViews())
 
@@ -407,14 +411,22 @@ export class VisualSim {
 		let regFileTable = $(this.regFilePanel).find("tbody")
 		if (regFileTable.children().length == 0) {
 			for (let [i, name] of registerNames.entries()) {
-				regFileTable.append(`
-					<tr> <td>${name} (x${i})</td> <td class="register-value"></td> </tr>
-				`)
+                if(this.state == "running" && this.playing > 0) {
+                    regFileTable.append(`
+					    <tr> <td>${name} (x${i})</td> <td class="register-value"></td> </tr>
+				    `)
+                } else {
+                    regFileTable.append(`
+					    <tr> <td>${name} (x${i})</td> <td class="register-value"><input type="text"/></td> </tr>
+				    `)
+                }
 			}
+            
 
-			regFileTable.append(`
-			<tr> <td>PC</td> <td class="register-value"></td> </tr>
-		`)
+		    regFileTable.append(`
+		        <tr> <td>PC</td> <td class="register-value"></td> </tr>
+	        `)
+            
 		}
 
 		// Generate dirLabels for mem view
@@ -471,7 +483,7 @@ export class VisualSim {
 
 		if (this.state == "unstarted") {
 			// update Register File input placeholders and values to match radix
-			let registerTds = $(this.regFilePanel).find(".editor input").get()
+			let registerTds = $(this.regFilePanel).find("input").get()
 			for (let [i, reg] of this.sim.registerFile.registers.entries()) {
 				$(registerTds[i]).prop("placeholder", intToStr(reg, regRadix))
 				let valStr = $(registerTds[i]).val() as string
@@ -517,7 +529,11 @@ export class VisualSim {
 					if (label) {
 						$(this.dataMemPanel).find("tbody").append(`<tr><td colspan="2"><b>${label}:</b></td></tr>`)
 					}
-					elem = `<tr> <td>${intToStr(addr, "hex")}</td> <td>${intToStr(val, memRadix, memWordSize)}</td> </tr>`
+                    if(this.playing > 0 || isInstr || addr <= 0x200n || addr >= 0x21000n) {
+					    elem = `<tr> <td>${intToStr(addr, "hex")}</td> <td>${intToStr(val, memRadix, memWordSize)}</td> </tr>`
+                    } else {
+                        elem = `<tr> <td>${intToStr(addr, "hex")}</td> <td><input type="text" name="mem-${intToStr(addr,"hex")}" value="${intToStr(val, memRadix, memWordSize)}"/></td> </tr>`
+                    }
 				} else {
 					elem = `<tr><td colspan="2">...</td></tr>`
 				}
@@ -527,7 +543,11 @@ export class VisualSim {
 			// update Register File
 			let registerTds = $(this.regFilePanel).find(".register-value").get()
 			for (let [i, reg] of this.sim.registerFile.registers.entries()) {
-				$(registerTds[i]).text(`${intToStr(reg, regRadix)}`)
+                if(this.playing > 0) {
+				    $(registerTds[i]).text(`${intToStr(reg, regRadix)}`)
+                } else {
+                    $(registerTds[i]).html(`<input type="text" name="reg-${i}" value="${intToStr(reg, regRadix)}"/>`)
+                }
 			}
 			$(registerTds[32]).text(`${intToStr(Bits.toInt(this.sim.wires.pcVal), regRadix)}`);
 
@@ -655,7 +675,7 @@ export class VisualSim {
 	public pause() {
 		clearInterval(this.playing)
 		this.playing = 0;
-		this.updateControls()
+		this.update()
 	}
 
 	/** Runs the machine until it hits the next instruction */
@@ -755,6 +775,37 @@ export class VisualSim {
             //removed as breakpoint
             $(this.instrMemPanel).find("#"+addr).removeClass("breakpoint-instruction")
         }
+    }
+
+    public readNewRegisterValue(event: any) {
+		let regRadix = this.regFileRadix()
+        const regNum = Number(event.target.name.substring(4))
+        let val = 0n
+        try {
+            val = parseInt(event.target.value, regRadix, 32)
+        }
+        catch {
+            this.error("Value not loaded")
+            return
+        }
+        if(val)
+            this.sim.registerFile.registers[regNum] = Bits(val, 32);
+    }
+
+    public readNewMemoryValue(event: any) {
+        console.log(event)
+		let memRadix = this.dataMemRadix()
+		let memWordSize = this.dataMemWordSize()
+        const memAddr = BigInt(event.target.name.substring(4))
+        let val = 0n
+        try {
+            val = parseInt(event.target.value, memRadix, memWordSize)
+        } catch {
+            this.error("Value not loaded")
+            return
+        }
+        if(val)
+            this.sim.ram.data.store(memAddr, memWordSize/8, val)
     }
 
 	/** Loads an example by name */

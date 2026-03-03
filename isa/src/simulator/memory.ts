@@ -124,7 +124,7 @@ export class Memory {
 
 		let dump = addresses
 			.map(addr => [addr, this.load(addr, wordSize)])
-			.filter(([addr, val]) => val != 0n)
+			//.filter(([addr, val]) => val != 0n)
 		dump.push([this.size, 0n]) // Make it add a range at the end.
 
 		let prevAddr: bigint = -wordSizeB
