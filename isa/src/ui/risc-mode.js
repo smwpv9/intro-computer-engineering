@@ -94,7 +94,7 @@ CodeMirror.defineMode("riscv", function (config, parserConfig) {
 	], "i");
 
 	var directives = regexFromWords([
-		"%hi", "%lo", "%pcrel_hi", "%pcrel_lo", ".word", ".byte", ".half", ".dword", ".string", ".instr", ".register", ".origin"
+		"%hi", "%lo", "%pcrel_hi", "%pcrel_lo", ".word", ".byte", ".half", ".dword", ".string", ".insn", ".register", ".origin"
 	], "");
 
 	function normal(stream, state) {

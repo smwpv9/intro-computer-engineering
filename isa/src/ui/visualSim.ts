@@ -782,7 +782,7 @@ export class VisualSim {
         const regNum = Number(event.target.name.substring(4))
         let val = 0n
         try {
-            val = parseInt(event.target.value, regRadix, 32)
+            val = parseInt(event.target.value.replace(/[ _]/g, ""), regRadix, 32)
         }
         catch {
             this.error("Value not loaded")
@@ -793,13 +793,12 @@ export class VisualSim {
     }
 
     public readNewMemoryValue(event: any) {
-        console.log(event)
 		let memRadix = this.dataMemRadix()
 		let memWordSize = this.dataMemWordSize()
         const memAddr = BigInt(event.target.name.substring(4))
         let val = 0n
         try {
-            val = parseInt(event.target.value, memRadix, memWordSize)
+            val = parseInt(event.target.value.replace(/[ _]/g, ""), memRadix, memWordSize)
         } catch {
             this.error("Value not loaded")
             return
