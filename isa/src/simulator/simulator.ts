@@ -1,9 +1,9 @@
 import { Bit, Bits, b } from "utils/bits"
 import * as Comp from "./components"
-import { stackStart, textStart } from "./constants";
+import { stackStart, textStart, osStart } from "./constants";
 
 export class Simulator {
-	public code: bigint[] = []; // The code loaded in the simulator
+	public code: (bigint|undefined)[] = []; // The code loaded in the simulator
 
 	// components
 	public wires: Comp.Wires;
@@ -59,14 +59,14 @@ export class Simulator {
 	}
 
 	/** Initialize instruction memory */
-	setCode(code: bigint[]) {
+	setCode(code: (bigint|undefined)[]) {
 		this.code = [...code];
 		this.ram.data.storeArray(textStart, 4, code);
 	}
 
 	/** Initialize the OS */
-	setOS(os: bigint[]) {
-		this.ram.data.storeArray(0x00000000n, 4, os);
+	setOS(os: (bigint|undefined)[]) {
+		this.ram.data.storeArray(osStart, 4, os);
 	}
 
 	/**

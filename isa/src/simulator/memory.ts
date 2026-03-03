@@ -95,9 +95,12 @@ export class Memory {
 	 * @param elemBytes The number of bytes each element should take
 	 * @param arr The array to store. Should contain positive integers.
 	 */
-	storeArray(addr: bigint, elemBytes: number, arr: bigint[]) {
-		for (let [i, val] of arr.entries())
-			this.store(addr + BigInt(elemBytes * i), elemBytes, val)
+	storeArray(addr: bigint, elemBytes: number, arr: (bigint|undefined)[]) {
+		for (let [i, val] of arr.entries()) {
+            if(val != undefined ) {
+			    this.store(addr + BigInt(elemBytes * i), elemBytes, val)
+            }
+        }
 	}
 
 	/**

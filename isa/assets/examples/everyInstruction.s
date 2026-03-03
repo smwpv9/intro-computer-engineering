@@ -1,4 +1,5 @@
-
+.origin 0x0001_0000
+.register a0, 10
 add zero, ra, sp
 addi gp, tp, 0b10_00
 sub t0, t1, t2
@@ -19,11 +20,9 @@ slti r8, r9, 1
 sltu r10, r11, r12
 sltiu r13, r14, -1
 auipc r15, 0x10
-auipc r15, %hi(END)
 auipc r15, %pcrel_hi(END)
 lui r16, 0x10
 lui r16, %hi(END)
-lui r16, %pcrel_hi(END)
 lb r17, 0x10(r18)
 lb r17, %lo(END)(r18)
 lh r19, 0x10(r20)
@@ -48,6 +47,7 @@ bge a0, a1, 0x10
 bgeu a0, a1, 0x10
 ecall
 
+END:
 mv a0, a1
 li a0, 0x10
 nop
@@ -62,9 +62,10 @@ ble a0, a1, 0x10
 bleu a0, a1, 0x10
 bgt a0, a1, 0x10
 bgtu a0, a1, 0x10
-.instr 0x0
+.insn 0x0
 
-END: .word 0x1, 0x2, 0x3, 0x4
+.origin 0x0001_2000
+DATA: .word 0x1, 0x2, 0x3, 0x4
 .half 0x1, 0x2, 0x3, 0x4
 .byte 0x1, 0x2, 0x3, 0x4
 .string "Hello Worlds!"

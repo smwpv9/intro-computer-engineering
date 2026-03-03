@@ -362,7 +362,7 @@ export class VisualSim {
 		let lines = code.split("\n")
 		let asmCode: [bigint, string, number][] = assembled.instructions.map(([line, addr]) => {
 			let instrInd = Number(addr - textStart) / 4
-			let instr = assembled.machineCode[instrInd]
+			let instr = assembled.machineCode[instrInd]!
             let disassembleInd = assembled.disassemble.map(([lnum,assem]) => lnum).indexOf(line)
             if( disassembleInd != -1 ) {
                 return [instr, assembled.disassemble[disassembleInd][1].trim(), instrInd]
@@ -373,6 +373,7 @@ export class VisualSim {
 
 		// Load code/data
 		this.sim.setCode(machineCode)
+        this.sim.setRegisters(assembled.registers)
 
 		// Load OS
 		if (loadOS) {
@@ -508,7 +509,7 @@ export class VisualSim {
 						continue
 					}
                     // skip OS completely as well
-                    if (!showInstr && addr <= 0x170) {
+                    if (!showInstr && addr <= 0x200) {
                         continue
                     }
 					// Show data value

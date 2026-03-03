@@ -3,7 +3,7 @@ import { Bit, Bits, b } from "utils/bits"
 import { registerNames, registers, opcodes, textStart } from "simulator/constants";
 import grammar from './assembler.ne';
 
-interface Program { instructions: [number, bigint][], directives: [number, bigint][], machineCode: bigint[], labels: Record<string, bigint>, disassemble: [number,string][] }
+interface Program { instructions: [number, bigint][], directives: [number, bigint][], machineCode: (bigint|undefined)[], labels: Record<string, bigint>, disassemble: [number,string][], registers: Record<number,bigint> }
 
 // AST types that are returned from the parser.
 interface Arg { type: string, value: any }
@@ -40,7 +40,9 @@ type Directive = { type: "DIR", data: bigint[], size: number, line: number }
 function directiveMatch(directive: AsmDirective, line: number): Directive | string {
 	const sizedData = new Map([[".byte", 1], [".half", 2], [".word", 4], [".dword", 8]])
 	const string = [".string"]
-    const machinecode = [".instr"]
+    const machinecode = [".insn"]
+    const origin = [".origin"]
+    const register = [".register"]
 	if (sizedData.has(directive.directive)) {
 		let data = []
 		let size = sizedData.get(directive.directive) as number
@@ -73,19 +75,47 @@ function directiveMatch(directive: AsmDirective, line: number): Directive | stri
         if(directive.args.length != 1) {
             return "Invalid number of directive arguments"
         }
-		for (let arg of directive.args) {
-			if (arg.type == "num") {
-				let value = arg.value
-				if (value > 2n ** (32n)) throw Error("Value can't fit in 4 bytes")
-				data.push(value)
-			} else {
-				return "Invalid directive argument"
-			}
+        const arg = directive.args[0]
+		if (arg.type == "num") {
+			let value = arg.value
+			if (value > 2n ** (32n)) throw Error("Value can't fit in 4 bytes")
+			data.push(value)
+		} else {
+			return "Invalid directive argument"
 		}
 		return { type: "DIR", data: data, size: -1, line: line }
-    } else {
-		return "Unknown directive"
-	}
+    } else if(origin.includes(directive.directive)) {
+        let data = []
+        if(directive.args.length != 1) {
+            return "Invalid number of directive arguments"
+        }
+        const arg = directive.args[0]
+        if(arg.type != "num") {
+            return "Invalid directive argument"
+        }
+        let value = arg.value
+		if (value > 2n ** (32n)) throw Error("Value can't fit in 4 bytes")
+		data.push(value)
+        return { type: "DIR", data: data, size: -2, line: line }
+    } else if(register.includes(directive.directive)) {
+        if(directive.args.length != 2) {
+            return "Invalid number of directive arguments"
+        }
+        const regArg = directive.args[0]
+        const valArg = directive.args[1]
+        if(regArg.type != "any" 
+            && valArg.type != "num") {
+            return "Invalid directive argument type"
+        }
+        const reg = String(regArg.value)
+        if (!(reg in registers))
+				throw Error(`Unknown register "${reg}"`)
+        const val = BigInt(valArg.value)
+	    if (val > 2n ** (32n)) throw Error("Value can't fit in 4 bytes")
+
+        return { type: "DIR", data: [BigInt(registers[reg]), val], size: -3, line: line } 
+    }
+    return "Unknown directive"
 }
 
 /** Contains rules for the args and types of instructions and how to convert them. */
@@ -270,14 +300,17 @@ export function assembleKeepLineInfo(program: string): Program {
 	let parsed = parse(program)
 
 	let labels: Record<string, bigint> = {}
-	let data: (Instr | Directive)[] = [];
+	let data: [bigint, (Instr | Directive)[]][] = [];
 	let instructions: [number, bigint][] = [];
 	let directives: [number, bigint][] = [];
-	let machineCode: bigint[] = [];
+	let machineCode: (bigint|undefined)[] = [];
     let disassemble: [number, string][] = [];
+    let regs: Record<number,bigint> = {};
 
 	// Pass 1, read labels, convert AST into Instruction types
+    let startAddr = textStart
 	let addr = textStart;
+    let currentData: (Instr |Directive)[] = []
 	for (let instr of parsed) {
 		if (instr.type == "label") {
 			labels[instr.label] = addr;
@@ -289,15 +322,24 @@ export function assembleKeepLineInfo(program: string): Program {
             if(directive.size > 0) {
 			    // Add to list
 			    directives.push([instr.line, addr]);
-			    data.push(directive)
+			    currentData.push(directive)
 			    // Calc new addr, and align to 4 bytes
 			    addr += BigInt(directive.data.length) * BigInt(directive.size);
 			    addr = (addr + 3n) & ~3n;
-            } else {
+            } else if(directive.size == -1) {
                 disassemble.push([instr.line, disassembleInstruction(directive.data[0])])
                 instructions.push([instr.line, addr])
-                data.push(directive)
+                currentData.push(directive)
                 addr += 4n
+            } else if(directive.size == -2){
+                if(directive.data[0] < addr)
+                    throw new AssemblerError(".origin must be address higher than current location", program, instr.line)
+                data.push([startAddr, currentData]);
+                addr = directive.data[0]
+                startAddr = addr
+                currentData = []
+            } else {
+                regs[Number(directive.data[0])] =  directive.data[1];
             }
 		} else {
 			let matchingRule = instrRules.find(r => ruleMatch(r, instr as AsmInstr))
@@ -306,53 +348,68 @@ export function assembleKeepLineInfo(program: string): Program {
 			}
 			let newInstr = matchingRule.conv(instr.op.toLowerCase(), instr.args.map((a) => a.value), instr.line)
 			instructions.push([instr.line, addr])
-			data.push(newInstr)
+			currentData.push(newInstr)
 			addr += 4n
-		}
+		} 
 	}
+    data.push([startAddr, currentData]);
 
 	// Pass 2, actually assemble the assembly
-	for (let instr of data) {
-		if (instr.type !== "DIR") {
-			try {
-				var machineCodeInstr = assembleInstr(BigInt(machineCode.length) * 4n + textStart, instr, labels)
-			} catch (e: any) {
-				throw new AssemblerError(e.message, program, instr.line)
-			}
-			machineCode.push(Bits.toInt(machineCodeInstr));
-		}
-		else if(instr.size > 0 ){
-			let count = 0;
-			let size = instr.size;
-			for (let d of instr.data) {
-				if (size == 1) {
-					count %= 4;
-					if (count == 0) {
-						machineCode.push(d);
-					} else {
-						machineCode[machineCode.length - 1] += d << BigInt(count * 8);
-					}
-				} else if (size == 2) {
-					count %= 2;
-					if (count == 0) {
-						machineCode.push(d);
-					} else {
-						machineCode[machineCode.length - 1] += d << BigInt(count * 16);
-					}
-				} else if (size == 4) {
-					machineCode.push(d);
-				} else if (size == 8) {
-					machineCode.push(d & 0xFFFFFFFFn);
-					machineCode.push(d >> 32n);
-				}
-				count++;
-			}
-		} else {
-            machineCode.push(instr.data[0])
-        }
-	}
+    addr = textStart
+    for( let region of data ) {
+        for(let i = addr; i < region[0]; i+=4n)
+            machineCode.push(undefined);
+        addr = region[0];
+	    for (let instr of region[1]) {
+		    if (instr.type !== "DIR") {
+			    try {
+				    var machineCodeInstr = assembleInstr( addr, instr, labels)
+			    } catch (e: any) {
+				    throw new AssemblerError(e.message, program, instr.line)
+			    }
+			    machineCode.push(Bits.toInt(machineCodeInstr));
+                addr += 4n
+		    }
+		    else if(instr.size > 0 ){
+			    let count = 0;
+			    let size = instr.size;
+			    for (let d of instr.data) {
+				    if (size == 1) {
+					    count %= 4;
+					    if (count == 0) {
+						    machineCode.push(d);
+                            addr += 4n;
+					    } else {
+    						machineCode[machineCode.length - 1]! += d << BigInt(count * 8);
+					    }
+				    } else if (size == 2) {
+					    count %= 2;
+					    if (count == 0) {
+						    machineCode.push(d);
+                            addr += 4n;
+					    } else {
+						    machineCode[machineCode.length - 1]! += d << BigInt(count * 16);
+					    }
+				    } else if (size == 4) {
+					    machineCode.push(d);
+                            addr += 4n;
+				    } else if (size == 8) {
+					    machineCode.push(d & 0xFFFFFFFFn);
+                            addr += 4n;
+					    machineCode.push(d >> 32n);
+                            addr += 4n;
+				    }
+				    count++;
+			    }
+		    } else if(instr.size == -1 ){
+                machineCode.push(instr.data[0])
+                            addr += 4n;
+            } else {
+            }
+	    }
+    }
 
-	return { instructions: instructions, directives: directives, machineCode: machineCode, labels: labels, disassemble: disassemble };
+	return { instructions: instructions, directives: directives, machineCode: machineCode, labels: labels, disassemble: disassemble, registers: regs };
 }
 
 /** Assembles a single instruction. */

@@ -32,10 +32,6 @@ CodeMirror.defineMode("riscv", function (config, parserConfig) {
 		"lhu",
 		"lui",
 		"lw",
-		"mul",
-		"mulh",
-		"mulhsu",
-		"mulhu",
 		"or",
 		"ori",
 		"rem",
@@ -56,44 +52,25 @@ CodeMirror.defineMode("riscv", function (config, parserConfig) {
 		"xor",
 		"xori",
 		/* pseudoinstructions */
-		"beqz",
-		"bgez",
 		"bgt",
 		"bgtu",
-		"bgtz",
 		"ble",
 		"bleu",
-		"blez",
-		"bltz",
-		"bnez",
-		"call",
-		"jal",
-		"jalr",
 		"j",
 		"jr",
-		"la",
-		"lb",
-		"lbu",
-		"lh",
-		"lhu",
 		"li",
 		"lw",
 		"mv",
-		"neg",
 		"nop",
 		"ret",
 		"not",
-		"ret",
-		"sb",
 		"seqz",
 		"sgtz",
-		"sh",
 		"sltz",
 		"snez",
 		"sw",
 		"tail",
 		"halt",
-		"nop",
 		/* nonstandard pseudoinstructions */
 		"seq",
 		"sge",
@@ -117,7 +94,7 @@ CodeMirror.defineMode("riscv", function (config, parserConfig) {
 	], "i");
 
 	var directives = regexFromWords([
-		"%hi", "%lo", "%pcrel_hi", "%pcrel_lo", ".word", ".byte", ".half", ".dword", ".string", ".instr"
+		"%hi", "%lo", "%pcrel_hi", "%pcrel_lo", ".word", ".byte", ".half", ".dword", ".string", ".instr", ".register", ".origin"
 	], "");
 
 	function normal(stream, state) {

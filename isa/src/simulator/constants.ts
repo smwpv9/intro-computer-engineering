@@ -1,6 +1,7 @@
 import { Bit, Bits, b } from "utils/bits"
 
 /** The starting address of the text section. */
+export const osStart = 0x0000_0000n
 export const textStart = 0x0001_0000n
 export const stackStart = 0x0002_0000n
 export const consoleNum = 0x0002_1000n // Only uses lower 5 bits
