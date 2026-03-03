@@ -9,7 +9,7 @@ enum MemSize {
 	HalfWord,
 	Word,
 }
-enum State {
+export enum State {
 	FETCH,
 	DECODE,
 	EXECUTE,

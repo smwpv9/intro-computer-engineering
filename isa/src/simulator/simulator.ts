@@ -116,7 +116,7 @@ export class Simulator {
 					throw e;
 			}
 		}
-        if(this.breakpoints.some(brkp => Bits.equal(this.pc.val, brkp))) {
+        if(this.breakpoints.some(brkp => Bits.equal(this.pc.val, brkp)) && this.controlFSM.state == Comp.State.FETCH) {
             return "brkp";
         }
 
