@@ -669,7 +669,7 @@ text.value-label, text.value-label tspan { display:inline;    fill:#000000;    f
            id="tspan38"
            style="stroke-width:0.265"
            x="559.85516"
-           y="399.45053">writeDataSrc</tspan></text>
+           y="398.45053">writeDataSrc</tspan></text>
     </g>
     <g
        id="regWrite"
@@ -692,7 +692,7 @@ text.value-label, text.value-label tspan { display:inline;    fill:#000000;    f
            id="tspan51"
            style="stroke-width:0.265"
            x="611.09161"
-           y="399.44501">regWrite</tspan></text>
+           y="398.44501">regWrite</tspan></text>
     </g>
     <g
        id="loadInstr"
@@ -716,7 +716,7 @@ text.value-label, text.value-label tspan { display:inline;    fill:#000000;    f
            id="tspan52"
            style="stroke-width:0.265"
            x="443.31268"
-           y="399.86475">loadInstr</tspan></text>
+           y="398.86475">loadInstr</tspan></text>
     </g>
     <g
        id="memWrite"
@@ -731,7 +731,7 @@ text.value-label, text.value-label tspan { display:inline;    fill:#000000;    f
            sodipodi:role="line"
            id="tspan54"
            style="stroke-width:0.265"
-           x="435.75067"
+           x="434.75067"
            y="387.22412">memWrite</tspan></text>
       <path
          style="stroke-dasharray:0.5, 0.5;stroke-dashoffset:0;marker-end:url(#Arrow)"
@@ -756,7 +756,7 @@ text.value-label, text.value-label tspan { display:inline;    fill:#000000;    f
            sodipodi:role="line"
            id="tspan67"
            style="stroke-width:0.265"
-           x="435.7507"
+           x="434.7507"
            y="381.91534">memFormat</tspan></text>
       <path
          style="stroke-dasharray:0.5, 0.5;stroke-dashoffset:0;marker-end:url(#Arrow)"
@@ -783,7 +783,7 @@ text.value-label, text.value-label tspan { display:inline;    fill:#000000;    f
            id="tspan56"
            style="stroke-width:0.265"
            x="654.46136"
-           y="399.81183">aluSrc</tspan></text>
+           y="398.81183">aluSrc</tspan></text>
       <path
          style="stroke-dasharray:0.5, 0.5;stroke-dashoffset:0;marker-end:url(#Arrow)"
          d="m 679.92948,400.32669 v 25.72028"
@@ -813,7 +813,7 @@ text.value-label, text.value-label tspan { display:inline;    fill:#000000;    f
          class="label"><tspan
            sodipodi:role="line"
            style="stroke-width:0.265"
-           x="680.6228"
+           x="679.6228"
            y="390.4198"
            id="tspan59">aluOp</tspan></text>
       <path
@@ -840,7 +840,7 @@ text.value-label, text.value-label tspan { display:inline;    fill:#000000;    f
            sodipodi:role="line"
            style="stroke-width:0.265"
            x="668.77301"
-           y="399.84189"
+           y="398.84189"
            id="tspan59-7">aluCalc</tspan></text>
       <path
          style="stroke-dasharray:0.5, 0.5;stroke-dashoffset:0;marker-end:url(#Arrow)"
@@ -872,7 +872,7 @@ text.value-label, text.value-label tspan { display:inline;    fill:#000000;    f
            sodipodi:role="line"
            id="tspan60"
            style="stroke-width:0.265"
-           x="-477.27936"
+           x="-476.27936"
            y="675.8819">branchBaseSrc</tspan></text>
       <path
          style="stroke-dasharray:0.5, 0.5;stroke-dashoffset:0;marker-end:url(#Arrow)"
@@ -898,7 +898,7 @@ text.value-label, text.value-label tspan { display:inline;    fill:#000000;    f
            sodipodi:role="line"
            id="tspan61"
            style="stroke-width:0.265"
-           x="-477.2157"
+           x="-476.2157"
            y="681.2038">branchZero</tspan></text>
       <path
          style="stroke-dasharray:0.5, 0.5;stroke-dashoffset:0;marker-end:url(#Arrow)"
@@ -924,7 +924,7 @@ text.value-label, text.value-label tspan { display:inline;    fill:#000000;    f
            sodipodi:role="line"
            id="tspan62"
            style="stroke-width:0.265"
-           x="-477.2157"
+           x="-476.2157"
            y="685.89532">branchNotZero</tspan></text>
       <path
          style="stroke-dasharray:0.5, 0.5;stroke-dashoffset:0;marker-end:url(#Arrow)"
@@ -949,7 +949,7 @@ text.value-label, text.value-label tspan { display:inline;    fill:#000000;    f
            sodipodi:role="line"
            id="tspan63"
            style="stroke-width:0.265"
-           x="619.7326"
+           x="620.7326"
            y="393.59717">pcLoad</tspan></text>
       <path
          style="stroke-dasharray:0.5, 0.5;stroke-dashoffset:0;marker-end:url(#Arrow)"
@@ -1356,7 +1356,7 @@ text.value-label, text.value-label tspan { display:inline;    fill:#000000;    f
          id="text728"
          transform="matrix(1,0,0,-1,726.68252,746.92338)"
          xml:space="preserve"><tspan
-           x="85.136353"
+           x="84.136353"
            y="200.54567"
            id="tspan3">Result</tspan></text>
       <text
@@ -1365,7 +1365,7 @@ text.value-label, text.value-label tspan { display:inline;    fill:#000000;    f
          y="-555.95233"
          id="text743"
          transform="scale(1,-1)"><tspan
-           x="815.47437"
+           x="814.47437"
            y="-555.95233"
            id="tspan741">Zero</tspan></text>
       <text
@@ -1379,7 +1379,7 @@ text.value-label, text.value-label tspan { display:inline;    fill:#000000;    f
            id="tspan57"
            style="stroke-width:0.265"
            x="-624.24554"
-           y="-534.39539">Op</tspan></text>
+           y="-533.39539">Op</tspan></text>
       <g
          id="aluZero"
          inkscape:label="aluZero"
@@ -1934,12 +1934,12 @@ text.value-label, text.value-label tspan { display:inline;    fill:#000000;    f
          y="418.89871"
          id="text19-0-9"
          class="label"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.58611px;line-height:1.25;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke-width:0.264583"><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.058611px;line-height:1.25;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke-width:0.264583"><tspan
            sodipodi:role="line"
            id="tspan19-1-2"
            style="stroke-width:0.565"
            x="504.70297"
-           y="418.89871">Op-Code [0-6]</tspan></text>
+           y="418.489871">Opcode [0-6]</tspan></text>
       <path
          style="display:inline;mix-blend-mode:normal;fill:none;stroke:#000000;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow-9-3-8)"
          d="m 523.2814,419.81014 h 15.36512 v -19.03831"
@@ -1959,12 +1959,12 @@ text.value-label, text.value-label tspan { display:inline;    fill:#000000;    f
          y="428.93246"
          id="text19-6-9"
          class="label"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.58611px;line-height:1.25;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke-width:0.264583"><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.0px;line-height:1.25;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke-width:0.264583"><tspan
            sodipodi:role="line"
            id="tspan19-0-5"
            style="stroke-width:0.565"
            x="507.87155"
-           y="428.93246">Funct3 [12-14]</tspan></text>
+           y="428.593246">Funct3 [12-14]</tspan></text>
       <path
          d="m 504.53837,429.84388 h 21.91157"
          id="path19-4-4"
@@ -1992,12 +1992,12 @@ text.value-label, text.value-label tspan { display:inline;    fill:#000000;    f
          y="443.85809"
          id="text19-03-1"
          class="label"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.58611px;line-height:1.25;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke-width:0.264583"><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.0px;line-height:1.25;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke-width:0.264583"><tspan
            sodipodi:role="line"
            id="tspan19-80-2"
            style="stroke-width:0.565"
            x="506.17416"
-           y="443.85809">Funct7 [25-31]</tspan></text>
+           y="443.55809">Funct7 [25-31]</tspan></text>
       <path
          d="m 502.84098,444.7695 h 21.91157"
          id="path19-66-3"
@@ -2033,12 +2033,12 @@ text.value-label, text.value-label tspan { display:inline;    fill:#000000;    f
          y="434.07434"
          id="text19-7-4"
          class="label"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.58611px;line-height:1.25;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke-width:0.264583"><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.0px;line-height:1.25;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke-width:0.264583"><tspan
            sodipodi:role="line"
            id="tspan19-7-1"
            style="stroke-width:0.565"
            x="507.87155"
-           y="434.07434">Read Reg 1 [15-19]</tspan></text>
+           y="433.507434">Read Reg 1 [15-19]</tspan></text>
       <path
          d="m 504.53839,434.98574 h 21.91157"
          id="path19-7-1"
@@ -2065,12 +2065,12 @@ text.value-label, text.value-label tspan { display:inline;    fill:#000000;    f
          y="438.96622"
          id="text19-9-8"
          class="label"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.58611px;line-height:1.25;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke-width:0.264583"><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.0px;line-height:1.25;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke-width:0.264583"><tspan
            sodipodi:role="line"
            id="tspan19-8-7"
            style="stroke-width:0.565"
            x="507.43002"
-           y="438.96622">Read Reg 2 [20-24]</tspan></text>
+           y="438.596622">Read Reg 2 [20-24]</tspan></text>
       <path
          d="m 504.09685,439.87762 h 21.91157"
          id="path19-9-4"
@@ -2098,12 +2098,12 @@ text.value-label, text.value-label tspan { display:inline;    fill:#000000;    f
          y="423.79059"
          id="text19-4-7"
          class="label"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.58611px;line-height:1.25;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke-width:0.264583"><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4px;line-height:1.25;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke-width:0.264583"><tspan
            sodipodi:role="line"
            id="tspan19-12-7"
            style="stroke-width:0.565"
            x="506.76279"
-           y="423.79059">Write Reg [7-11]</tspan></text>
+           y="423.4">Write Reg [7-11]</tspan></text>
       <path
          d="m 503.42961,424.70201 h 21.91157"
          id="path19-5-9"
@@ -2182,8 +2182,8 @@ text.value-label, text.value-label tspan { display:inline;    fill:#000000;    f
        id="text1033"
        transform="matrix(-1,0,0,1,370.21961,22.350347)"
        xml:space="preserve"><tspan
-         x="81.286972"
-         y="200.54567"
+         x="82.286972"
+         y="199.54567"
          id="tspan7">Data Memory</tspan></text>
     <text
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.58611px;line-height:1.25;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;text-anchor:start;fill:#000000;fill-opacity:1;stroke-width:0.264583"
@@ -2197,12 +2197,12 @@ text.value-label, text.value-label tspan { display:inline;    fill:#000000;    f
          id="tspan18"
          x="-302.8486"
          y="204.95746"><tspan
-           x="-302.8486"
+           x="-301.8486"
            y="204.95746"
            id="tspan4-40"
            style="text-align:start;text-anchor:start">Write</tspan></tspan><tspan
          sodipodi:role="line"
-         x="-302.8486"
+         x="-301.8486"
          y="210.69009"
          id="tspan29">Data</tspan></text>
     <text
@@ -2212,7 +2212,7 @@ text.value-label, text.value-label tspan { display:inline;    fill:#000000;    f
        id="text1071"
        transform="scale(-1,1)"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.58611px;line-height:1.25;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke-width:0.264583"><tspan
-         x="-303.33932"
+         x="-302.33932"
          y="182.86517"
          id="tspan1069">Address</tspan></text>
     <text
@@ -2223,12 +2223,12 @@ text.value-label, text.value-label tspan { display:inline;    fill:#000000;    f
        transform="matrix(-1,0,0,1,10.48254,0)"
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.58611px;line-height:1.25;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:end;text-anchor:end;white-space:pre;inline-size:11.5647;display:inline;fill:#000000;fill-opacity:1;stroke-width:0.264583"><tspan
-         x="-257.0502"
+         x="-258.0502"
          y="191.6422"
          id="tspan8">Read<tspan
    y="191.6422"
    id="tspan9"> </tspan></tspan><tspan
-         x="-257.0502"
+         x="-258.0502"
          y="197.37482"
          id="tspan10">Data</tspan></text>
     <text
@@ -2288,9 +2288,9 @@ text.value-label, text.value-label tspan { display:inline;    fill:#000000;    f
        xml:space="preserve"><tspan
          x="95.26252"
          y="200.54567"
-         id="tspan11">Instr.
+         id="tspan11">Instr
 </tspan><tspan
-         x="95.26252"
+         x="94.26252"
          y="206.2783"
          id="tspan12">Out</tspan></text>
     <text
@@ -2303,7 +2303,7 @@ text.value-label, text.value-label tspan { display:inline;    fill:#000000;    f
        xml:space="preserve"><tspan
          x="95.26252"
          y="200.54567"
-         id="tspan13">Addr.</tspan></text>
+         id="tspan13">Addr</tspan></text>
     <text
        style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.58611px;line-height:1.25;font-family:Arial;-inkscape-font-specification:'Arial, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;white-space:pre;inline-size:27.6026;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
        class="component-name"
@@ -2313,12 +2313,12 @@ text.value-label, text.value-label tspan { display:inline;    fill:#000000;    f
        transform="translate(-5.1853545,-35.702459)"
        xml:space="preserve"><tspan
          x="85.060211"
-         y="200.54567"
+         y="199.54567"
          id="tspan14">Instruction<tspan
    y="200.54567"
    id="tspan15"> </tspan></tspan><tspan
          x="85.060211"
-         y="206.2783"
+         y="205.2783"
          id="tspan16">Memory</tspan></text>
     <path
        style="marker-end:url(#Arrow)"
