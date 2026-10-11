@@ -13,26 +13,26 @@ srl s6, s7, s8
 srli s9, s10, 0x0
 sra s11, t3, t4
 srai t5, t6, 0
-sll r0, r1, r2
-slli r3, r4, 1
-slt r5, r6, r7
-slti r8, r9, 1
-sltu r10, r11, r12
-sltiu r13, r14, -1
-auipc r15, 0x10
-auipc r15, %pcrel_hi(END)
-lui r16, 0x10
-lui r16, %hi(END)
-lb r17, 0x10(r18)
-lb r17, %lo(END)(r18)
-lh r19, 0x10(r20)
-lh r19, %pcrel_lo(END)(r20)
-lw r21, 0x10(r22)
-lbu r23, 0x10(r24)
-lhu r25, 0x10(r26)
-sb r27, 0x10(r28)
-sh r29, 0x10(r30)
-sw r31, 0x10(a0)
+sll x0, x1, x2
+slli x3, x4, 1
+slt x5, x6, x7
+slti x8, x9, 1
+sltu x10, x11, x12
+sltiu x13, x14, -1
+auipc x15, 0x10
+auipc x15, %pcrel_hi(END)
+lui x16, 0x10
+lui x16, %hi(END)
+lb x17, 0x10(x18)
+lb x17, %lo(END)(x18)
+lh x19, 0x10(x20)
+lh x19, %pcrel_lo(END)(x20)
+lw x21, 0x10(x22)
+lbu x23, 0x10(x24)
+lhu x25, 0x10(x26)
+sb x27, 0x10(x28)
+sh x29, 0x10(x30)
+sw x31, 0x10(a0)
 jal a0, 0x10
 jal a0, END
 jalr a0, 0x10(a0)

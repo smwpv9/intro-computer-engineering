@@ -15,6 +15,7 @@
             </a>
         </div>-->
         <h1>Operations</h1>
+        <p>Note, this simulator currently only zero-extends. The output of Add produces the result for both unsigned and signed (2's complement) representations and indicates if overflow occurred.</p>
         <button
           onClick=random()
           class=button
