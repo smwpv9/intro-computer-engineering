@@ -13,20 +13,12 @@ These tools are for the major portions of the CS252 course. They include:
 
 
 ## Installation
-for textbooksim
-
-npm install
-npm start
-
-
-for risc-v-graphical-data-path-simulator
-npm install
-npm run serve
-
-
-for fsm simulator
+### Within isa folder
 npm install
 npm run build
+
+This produces an html folder in the main repository
+
 
 
 ## Collaboration
