@@ -132,11 +132,11 @@ export class VisualSim {
 
 	private svg: HTMLElement
 	private editors: HTMLElement
+	private signalPanel: HTMLElement
 	private instrMemPanel: HTMLElement
 	private dataMemPanel: HTMLElement
 	private regFilePanel: HTMLElement
 	private instrMemEditor: CodeMirror
-	// private dataMemEditor: CodeMirror
 
 	private state: State = "unstarted"
 	private playing: number = 0 // Timer handle to the play loop, or 0 if not playing.
@@ -151,6 +151,7 @@ export class VisualSim {
 		// initialize elements
 		this.svg = $("#datapath svg")[0]
 		this.editors = $("#editors")[0]
+		this.signalPanel = $("#signal-panel")[0]
 		this.instrMemPanel = $("#instrMem-panel")[0]
 		this.dataMemPanel = $("#dataMem-panel")[0]
 		this.regFilePanel = $("#regFile-panel")[0]
@@ -637,11 +638,35 @@ export class VisualSim {
 		}
 	}
 
+	private updateSignalTable() {
+		let signalTable : HTMLElement = $(this.signalPanel).find("tbody")[0]
+		$(signalTable).empty()
+		$(signalTable).append(`<tr><td>PC</td><td>${intToStr(this.sim.pc.val,"hex")}</td></tr>`)
+		$(signalTable).append(`<tr><td>IR</td><td>${intToStr(this.sim.instructionMemory.instruction,"hex")}</td></tr>`)
+		$(signalTable).append(`<tr><td>Opcode</td><td>${intToStr(this.sim.wires.opcode,"bin")}</td></tr>`)
+		$(signalTable).append(`<tr><td>Func3</td><td>${intToStr(this.sim.wires.funct3,"bin")}</td></tr>`)
+		$(signalTable).append(`<tr><td>Func7</td><td>${intToStr(this.sim.wires.funct7,"bin")}</td></tr>`)
+		$(signalTable).append(`<tr><td>Source Reg 1</td><td>${intToStr(this.sim.wires.readReg1,"dec")}</td></tr>`)
+		$(signalTable).append(`<tr><td>Source Reg 2</td><td>${intToStr(this.sim.wires.readReg2,"dec")}</td></tr>`)
+		$(signalTable).append(`<tr><td>Destination Reg</td><td>${intToStr(this.sim.wires.writeReg,"dec")}</td></tr>`)
+		$(signalTable).append(`<tr><td>Immediate Value</td><td>${intToStr(this.sim.wires.immediate,"dec")}</td></tr>`)
+		$(signalTable).append(`<tr><td>ALU Input 1</td><td>${intToStr(this.sim.wires.aluIn1,"hex")} (${intToStr(this.sim.wires.aluIn1,"dec")})</td></tr>`)
+		$(signalTable).append(`<tr><td>ALU Input 2</td><td>${intToStr(this.sim.wires.aluIn2,"hex")} (${intToStr(this.sim.wires.aluIn2,"dec")})</td></tr>`)
+		$(signalTable).append(`<tr><td>ALU Operation</td><td>${this.sim.wires.aluOp}</td></tr>`)
+		$(signalTable).append(`<tr><td>ALU Result</td><td>${intToStr(this.sim.wires.aluOut,"hex")}</td></tr>`)
+		$(signalTable).append(`<tr><td>ALU Result is Zero</td><td>${this.sim.wires.aluZero}</td></tr>`)
+		$(signalTable).append(`<tr><td>Memory Address</td><td>${intToStr(this.sim.wires.memAddress,"hex")}</td></tr>`)
+		$(signalTable).append(`<tr><td>Memory Data In (Write)</td><td>${intToStr(this.sim.wires.readData2,"hex")}</td></tr>`)
+		$(signalTable).append(`<tr><td>Memory Data Out (Read)</td><td>${intToStr(this.sim.wires.memReadData,"hex")}</td></tr>`)
+	}
+
 	/** update controls, editors, views, and datapath */
 	private update() {
 		this.updateControls()
 		if ($("#instrMem-tab").hasClass("active"))
 			this.updateEditorsAndViews()
+		else if ( $("#signal-tab").hasClass("active"))
+			this.updateSignalTable()
 		else
 			this.updateDatapath()
 	}

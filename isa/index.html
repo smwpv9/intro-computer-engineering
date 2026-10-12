@@ -18,6 +18,12 @@
 					</button>
 				</li>
 				<li class="nav-item" role="presentation">
+					<button class="nav-link" id="signal-tab" data-bs-toggle="tab" data-bs-target="#signal-panel"
+						type="button" role="tab" aria-controls="signal-panel" aria-selected="true">
+						Signal Table
+					</button>
+				</li>
+				<li class="nav-item" role="presentation">
 					<button class="nav-link" id="instrMem-tab" data-bs-toggle="tab" data-bs-target="#instrMem-panel"
 						type="button" role="tab" aria-controls="instrMem-panel" aria-selected="true">
 						Code
@@ -59,6 +65,20 @@
 				<div id="datapath-panel" class="tab-pane fade show active" role="tabpanel"
 					aria-labelledby="datapath-tab">
 					<div id="datapath" class="flex-grow-1"> <!-- We'll load the SVG inline here. --> </div>
+				</div>
+				<div id="signal-panel" class="tab-pane fade show" role="tabpanel"
+					aria-labelledby="datapath-tab">
+					<div class="overflow-auto flex-grow-1">
+						<table class="table table-striped table-hover table-bordered signal-table">
+							<thead>
+								<tr>
+									<th>Signal Name</th>
+                                    <th>Value</th>
+								</tr>
+							</thead>
+							<tbody id="sigVal-table"></tbody>
+						</table>
+					</div>
 				</div>
 				<div id="instrMem-panel" class="tab-pane fade" role="tabpanel" aria-labelledby="instrMem-tab">
 					<div class="editor">
