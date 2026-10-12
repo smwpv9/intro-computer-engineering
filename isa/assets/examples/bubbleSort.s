@@ -37,7 +37,7 @@ SORT:
 	    bge s3, s6, END_FOR_I # go to endForI if i >= n
 		addi s4, s3, -1 # j = i - 1
 		FOR_J:
-		    blt s4, r0, END_FOR_J # go to endForJ if j < 0
+		    blt s4, zero, END_FOR_J # go to endForJ if j < 0
 			slli t0, s4, 2 # t0 = j * 4
 			add t0, s5, t0 # t0 = v + (j * 4)
 			lw t1, 0(t0) # t1 = v[j]
