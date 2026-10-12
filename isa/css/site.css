@@ -186,6 +186,24 @@ table.table-fit tbody td, table.table-fit tfoot td {
 }
 
 
+.signal-table {
+	font-family: monospace;
+	font-size: 110%;
+	padding: 0;
+	margin: 0;
+}
+
+.signal-table td {
+	padding: 5px;
+	margin: 0;
+}
+
+.signal-table td:nth-child(1) {
+	text-align: right;
+	white-space: nowrap;
+	width: 1px;
+	/* Force to minimum that doesn't wrap */
+}
 
 /** ==== SVG Styling ==== */
 
