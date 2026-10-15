@@ -71,7 +71,7 @@ const opCodeNames = new TruthTable([
     [["1110011"], "ecall"]
 ])
 
-const aluControlNames = new TruthTable([
+export const aluControlNames = new TruthTable([
 	[["000", "0"], "Add"],
 	[["000", "1"], "Sub"],
 	[["001", "X"], "Shift Left"],

@@ -4,7 +4,7 @@ import { assembleKeepLineInfo, disassembleInstruction } from "assembler/assemble
 import { Radix, parseInt, intToStr } from "utils/radix"
 
 import { Example, examples } from "./examples";
-import { DataPathElem, datapathElements } from "./datapath";
+import { DataPathElem, datapathElements, aluControlNames } from "./datapath";
 
 import $ from "jquery"
 import CodeMirror from "codemirror";
@@ -650,9 +650,9 @@ export class VisualSim {
 		$(signalTable).append(`<tr><td>Source Reg 2</td><td>${intToStr(this.sim.wires.readReg2,"dec")}</td></tr>`)
 		$(signalTable).append(`<tr><td>Destination Reg</td><td>${intToStr(this.sim.wires.writeReg,"dec")}</td></tr>`)
 		$(signalTable).append(`<tr><td>Immediate Value</td><td>${intToStr(this.sim.wires.immediate,"dec")}</td></tr>`)
-		$(signalTable).append(`<tr><td>ALU Input 1</td><td>${intToStr(this.sim.wires.aluIn1,"hex")} (${intToStr(this.sim.wires.aluIn1,"dec")})</td></tr>`)
-		$(signalTable).append(`<tr><td>ALU Input 2</td><td>${intToStr(this.sim.wires.aluIn2,"hex")} (${intToStr(this.sim.wires.aluIn2,"dec")})</td></tr>`)
-		$(signalTable).append(`<tr><td>ALU Operation</td><td>${this.sim.wires.aluOp}</td></tr>`)
+		$(signalTable).append(`<tr><td>IN FF 1 output</td><td>${intToStr(this.sim.wires.aluIn1,"hex")} (${intToStr(this.sim.wires.aluIn1,"dec")})</td></tr>`)
+		$(signalTable).append(`<tr><td>IN FF 2 output</td><td>${intToStr(this.sim.wires.aluIn2,"hex")} (${intToStr(this.sim.wires.aluIn2,"dec")})</td></tr>`)
+		$(signalTable).append(`<tr><td>ALU Operation</td><td>${intToStr(BigInt(this.sim.wires.aluOp), "bin", 4) + (this.sim.wires.aluAlt == 0 ? "0" : "1")} (${aluControlNames.match(this.sim.wires.aluOp, this.sim.wires.aluAlt)})</td></tr>`)
 		$(signalTable).append(`<tr><td>ALU Result</td><td>${intToStr(this.sim.wires.aluOut,"hex")}</td></tr>`)
 		$(signalTable).append(`<tr><td>ALU Result is Zero</td><td>${this.sim.wires.aluZero}</td></tr>`)
 		$(signalTable).append(`<tr><td>Memory Address</td><td>${intToStr(this.sim.wires.memAddress,"hex")}</td></tr>`)
